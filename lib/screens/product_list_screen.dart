@@ -364,16 +364,16 @@ final List<Product> allProducts = [
     category: "SURGEN",
   ),
 
-  //
+  //Antifungal
   Product(
     id: 'pantifungal1',
     imageUrl: 'assets/antifungal/6.jpg',
-    category: "GYNIC",
+    category: "ANTIFUNGAL",
   ),
   Product(
-    id: 'pantifungal1',
+    id: 'pantifungal2',
     imageUrl: 'assets/antifungal/13.jpg',
-    category: "PHYSICIAN",
+    category: "ANTIFUNGAL",
   ),
 ];
 

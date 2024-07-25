@@ -70,7 +70,7 @@ class SlideshowScreen extends StatelessWidget {
                         image: AssetImage(
                           product.imageUrl,
                         ),
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                       ),
                     ),
                   ),
