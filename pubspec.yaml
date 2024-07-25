@@ -74,6 +74,7 @@ flutter:
     - assets/ortho/
     - assets/physician/
     - assets/surgen/
+    - assets/antifungal/
     - assets/logo.jpg
     - assets/blogo.png
     - assets/bnewlogo.jpeg
