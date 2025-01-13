@@ -306,6 +306,16 @@ final List<Product> allProducts = [
     imageUrl: 'assets/physician/15.jpg',
     category: "PHYSICIAN",
   ),
+  Product(
+    id: 'pphysician16',
+    imageUrl: 'assets/physician/bharathzyme_visual.jpg',
+    category: "PHYSICIAN",
+  ),
+  Product(
+    id: 'pphysician17',
+    imageUrl: 'assets/physician/vitathon_gold.jpg',
+    category: "PHYSICIAN",
+  ),
 
   //SURGEN
   Product(
@@ -374,6 +384,17 @@ final List<Product> allProducts = [
     id: 'pantifungal2',
     imageUrl: 'assets/antifungal/13.jpg',
     category: "ANTIFUNGAL",
+  ),
+  //PEDIATRIC
+  Product(
+    id: 'pediatric1',
+    imageUrl: 'assets/pediatric/bharathzyme_visual_pedia.jpg',
+    category: "PEDIATRIC",
+  ),
+  Product(
+    id: 'pediatric2',
+    imageUrl: 'assets/pediatric/Vitathon_goldpedia.jpg',
+    category: "PEDIATRIC",
   ),
 ];
 
