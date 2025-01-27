@@ -93,7 +93,7 @@ BEGIN
             VALUE "FileDescription", "bharathbiomedpharma" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "bharathbiomedpharma" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2024 com.bharathbiomedpharma. All rights reserved." "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2024 com.syncosolve. All rights reserved." "\0"
             VALUE "OriginalFilename", "bharathbiomedpharma.exe" "\0"
             VALUE "ProductName", "bharathbiomedpharma" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"

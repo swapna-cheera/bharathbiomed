@@ -8,7 +8,7 @@
 PRODUCT_NAME = bharathbiomedpharma
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.bharathbiomedpharma.bharathbiomedpharma
+PRODUCT_BUNDLE_IDENTIFIER = com.syncosolve.bharathbiomedpharma
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2024 com.bharathbiomedpharma. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2024 com.syncosolve. All rights reserved.

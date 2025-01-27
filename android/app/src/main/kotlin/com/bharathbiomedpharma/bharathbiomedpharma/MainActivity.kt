@@ -1,4 +1,4 @@
-package com.bharathbiomedpharma.bharathbiomedpharma
+package com.syncosolve.bharathbiomedpharma
 
 import io.flutter.embedding.android.FlutterActivity
 

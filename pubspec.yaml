@@ -1,5 +1,5 @@
 name: bharathbiomedpharma
-description: "A new Flutter project."
+description: "The Bharath Biomed Pharma App is your convenient gateway to explore, learn about, and purchase a wide range of high-quality pharmaceutical products."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -40,6 +40,13 @@ dependencies:
   photo_view: ^0.15.0
   widget_zoom: ^0.0.4
   flutter_native_splash: ^2.4.4
+  firebase_core: ^3.10.1
+  firebase_crashlytics: ^4.3.1
+  firebase_analytics: ^11.4.1
+  firebase_storage: ^12.4.1
+  cloud_firestore: ^5.6.2
+  firebase_auth: ^5.4.1
+  quickalert: ^1.1.0
   # flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
