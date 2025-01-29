@@ -61,8 +61,9 @@ class _ProductListScreenState extends State<ProductListScreen> {
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) =>
-              SlideshowScreen(selectedProducts: selectedProducts),
+          builder: (context) => SlideshowScreen(
+            selectedProducts: selectedProducts,
+          ),
         ),
       );
     }

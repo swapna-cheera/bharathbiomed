@@ -18,7 +18,7 @@ class SlideshowScreen extends StatelessWidget {
             options: CarouselOptions(
               height: MediaQuery.of(context).size.height,
               viewportFraction: 1.0,
-              enlargeCenterPage: true,
+              enlargeCenterPage: false,
               autoPlay: false,
               enableInfiniteScroll: false,
             ),
@@ -27,13 +27,16 @@ class SlideshowScreen extends StatelessWidget {
                 builder: (BuildContext context) {
                   return WidgetZoom(
                     heroAnimationTag: product.id,
-                    zoomWidget: Container(
-                      width: MediaQuery.of(context).size.width,
-                      height: MediaQuery.of(context).size.height,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: CachedNetworkImageProvider(product.imageUrl),
-                          fit: BoxFit.contain,
+                    zoomWidget: SizedBox(
+                      child: AspectRatio(
+                        aspectRatio: 16 / 9,
+                        child: CachedNetworkImage(
+                          imageUrl: product.imageUrl,
+                          placeholder: (context, url) =>
+                              Center(child: CircularProgressIndicator()),
+                          errorWidget: (context, url, error) =>
+                              Icon(Icons.error),
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
