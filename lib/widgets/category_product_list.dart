@@ -8,8 +8,11 @@ class CategoryProductList extends StatelessWidget {
   final String category;
   final List<Product> products;
 
-  const CategoryProductList(
-      {super.key, required this.category, required this.products});
+  const CategoryProductList({
+    super.key,
+    required this.category,
+    required this.products,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +26,10 @@ class CategoryProductList extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             category,
-            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
         SizedBox(
@@ -33,13 +39,15 @@ class CategoryProductList extends StatelessWidget {
             itemCount: products.length,
             itemBuilder: (ctx, i) {
               final product = products[i];
-              final isSelected =
-                  selectedProductsProvider.selectedProducts.contains(product);
+              final isSelected = selectedProductsProvider.isSelected(product);
               final selectionNumber = isSelected
                   ? selectedProductsProvider.selectedProducts.indexOf(product) +
                       1
                   : null;
-              return ProductItem(products[i], selectionNumber ?? 0);
+              return ProductItem(
+                product,
+                selectionNumber ?? 0,
+              );
             },
           ),
         ),

@@ -1,22 +1,20 @@
-import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '/models/selected_products.dart';
+import 'package:carousel_slider/carousel_slider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:widget_zoom/widget_zoom.dart';
+import '../models/product.dart';
 
 class SlideshowScreen extends StatelessWidget {
-  const SlideshowScreen({super.key});
+  final List<Product> selectedProducts;
+
+  const SlideshowScreen({super.key, required this.selectedProducts});
 
   @override
   Widget build(BuildContext context) {
-    final selectedProducts =
-        Provider.of<SelectedProductsChangeNotifier>(context).selectedProducts;
-    debugPrint('selectedProducts ${selectedProducts.length}');
     return Scaffold(
       body: Stack(
         children: [
           CarouselSlider(
-            disableGesture: false,
             options: CarouselOptions(
               height: MediaQuery.of(context).size.height,
               viewportFraction: 1.0,
@@ -27,18 +25,15 @@ class SlideshowScreen extends StatelessWidget {
             items: selectedProducts.map((product) {
               return Builder(
                 builder: (BuildContext context) {
-                  debugPrint('Product Id ${product.id} ${product.imageUrl}');
                   return WidgetZoom(
                     heroAnimationTag: product.id,
                     zoomWidget: Container(
                       width: MediaQuery.of(context).size.width,
-                      // height: MediaQuery.of(context).size.height,
+                      height: MediaQuery.of(context).size.height,
                       decoration: BoxDecoration(
                         image: DecorationImage(
-                          image: AssetImage(
-                            product.imageUrl,
-                          ),
-                          fit: BoxFit.fitWidth,
+                          image: CachedNetworkImageProvider(product.imageUrl),
+                          fit: BoxFit.contain,
                         ),
                       ),
                     ),

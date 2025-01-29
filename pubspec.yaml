@@ -47,6 +47,7 @@ dependencies:
   cloud_firestore: ^5.6.2
   firebase_auth: ^5.4.1
   quickalert: ^1.1.0
+  cached_network_image: ^3.3.1
   # flutter_launcher_icons: ^0.13.1
 
 dev_dependencies:
@@ -75,14 +76,6 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/
-    - assets/dental/
-    - assets/ent/
-    - assets/gynic/
-    - assets/ortho/
-    - assets/physician/
-    - assets/surgen/
-    - assets/antifungal/
-    - assets/pediatric/
     - assets/logo.jpg
     - assets/blogo.png
     - assets/bnewlogo.jpeg

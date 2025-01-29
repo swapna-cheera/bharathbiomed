@@ -12,11 +12,11 @@ class SelectedProductsChangeNotifier with ChangeNotifier {
     return _selectedProducts.contains(product);
   }
 
-  void toggleSelection(Product productId) {
-    if (_selectedProducts.contains(productId)) {
-      _selectedProducts.remove(productId);
+  void toggleSelection(Product product) {
+    if (_selectedProducts.contains(product)) {
+      _selectedProducts.remove(product);
     } else {
-      _selectedProducts.add(productId);
+      _selectedProducts.add(product);
     }
     debugPrint('_selectedProductIds ${_selectedProducts.toString()}');
     notifyListeners();

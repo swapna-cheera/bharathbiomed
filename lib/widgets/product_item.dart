@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/product.dart';
 import '../models/selected_products.dart';
 
 class ProductItem extends StatelessWidget {
   final Product product;
   final int sNumber;
+
   const ProductItem(this.product, this.sNumber, {super.key});
 
   @override
@@ -27,7 +29,7 @@ class ProductItem extends StatelessWidget {
             Container(
               decoration: BoxDecoration(
                 image: DecorationImage(
-                  image: AssetImage(product.imageUrl),
+                  image: CachedNetworkImageProvider(product.imageUrl),
                   fit: BoxFit.contain,
                 ),
                 borderRadius: BorderRadius.circular(10),
@@ -39,7 +41,7 @@ class ProductItem extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withValues(alpha: 0.7),
+                  color: Colors.white.withOpacity(0.7),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
@@ -52,6 +54,23 @@ class ProductItem extends StatelessWidget {
                 ),
               ),
             ),
+            if (sNumber > 0)
+              Positioned(
+                top: 10,
+                right: 10,
+                child: CircleAvatar(
+                  radius: 12,
+                  backgroundColor: Colors.blue,
+                  child: Text(
+                    sNumber.toString(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
           ],
         ),
       ),
