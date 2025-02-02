@@ -41,7 +41,7 @@ class ProductItem extends StatelessWidget {
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withAlpha(70),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.all(4.0),
