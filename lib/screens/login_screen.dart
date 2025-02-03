@@ -1,4 +1,5 @@
 import 'package:bharathbiomedpharma/services/firebase_auth_service.dart';
+import 'package:bharathbiomedpharma/services/firebase_firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:quickalert/quickalert.dart';
@@ -32,6 +33,8 @@ class _LoginScreenState extends State<LoginScreen> {
         _passwordController.text.trim(),
       );
       if (user != null) {
+        await FirebaseFirestoreService().syncData();
+
         // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/productList');
       } else {

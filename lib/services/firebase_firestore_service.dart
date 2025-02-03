@@ -1,5 +1,6 @@
+import 'package:bharathbiomedpharma/services/databasehelper.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart'; // Import the foundation package
+import 'package:flutter/foundation.dart';
 
 class FirebaseFirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -7,13 +8,28 @@ class FirebaseFirestoreService {
   // Get all products
   Future<List<Map<String, dynamic>>> getAllProducts() async {
     try {
+      // Check local database first
+      List<Map<String, dynamic>> localProducts =
+          await DatabaseHelper.instance.getProducts();
+      if (localProducts.isNotEmpty) {
+        return localProducts;
+      }
+
+      // If local database is empty, fetch from Firebase
       QuerySnapshot querySnapshot =
           await _firestore.collection('Products').get();
-      return querySnapshot.docs.map((doc) {
+      List<Map<String, dynamic>> products = querySnapshot.docs.map((doc) {
         Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
         data['id'] = doc.id;
         return data;
       }).toList();
+
+      // Save products to local database
+      for (var product in products) {
+        await DatabaseHelper.instance.insertProduct(product);
+      }
+
+      return products;
     } catch (e) {
       debugPrint('Error getting products: $e');
       return [];
@@ -23,10 +39,26 @@ class FirebaseFirestoreService {
   // Get all departments
   Future<List<String>> getDepartments() async {
     try {
+      // Check local database first
+      List<String> localDepartments =
+          await DatabaseHelper.instance.getDepartments();
+      if (localDepartments.isNotEmpty) {
+        return localDepartments;
+      }
+
+      // If local database is empty, fetch from Firebase
       DocumentSnapshot docSnapshot =
           await _firestore.collection('Department').doc('departmentsDoc').get();
       if (docSnapshot.exists) {
-        return List<String>.from(docSnapshot['departments']);
+        List<String> departments =
+            List<String>.from(docSnapshot['departments']);
+
+        // Save departments to local database
+        for (var department in departments) {
+          await DatabaseHelper.instance.insertDepartment(department);
+        }
+
+        return departments;
       } else {
         return [];
       }
@@ -36,7 +68,7 @@ class FirebaseFirestoreService {
     }
   }
 
-// Delete products with missing department or image URL
+  // Delete products with missing department or image URL
   Future<void> deleteProductsWithMissingDepartmentOrImageUrl() async {
     try {
       QuerySnapshot querySnapshot =
@@ -57,6 +89,35 @@ class FirebaseFirestoreService {
     } catch (e) {
       debugPrint(
           'Error checking for products with missing department or image URL: $e');
+    }
+  }
+
+  // Sync data from Firebase to local database
+  Future<void> syncData() async {
+    try {
+      // Sync products
+      QuerySnapshot productQuerySnapshot =
+          await _firestore.collection('Products').get();
+      for (var doc in productQuerySnapshot.docs) {
+        Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+        data['id'] = doc.id;
+        await DatabaseHelper.instance.insertProduct(data);
+      }
+      debugPrint('Products synchronized from Firebase to local database');
+
+      // Sync departments
+      DocumentSnapshot departmentDocSnapshot =
+          await _firestore.collection('Department').doc('departmentsDoc').get();
+      if (departmentDocSnapshot.exists) {
+        List<String> departments =
+            List<String>.from(departmentDocSnapshot['departments']);
+        for (var department in departments) {
+          await DatabaseHelper.instance.insertDepartment(department);
+        }
+      }
+      debugPrint('Departments synchronized from Firebase to local database');
+    } catch (e) {
+      debugPrint('Error synchronizing data: $e');
     }
   }
 }
