@@ -18,6 +18,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
   final FirebaseFirestoreService _firestoreService = FirebaseFirestoreService();
   List<Product> allProducts = [];
   List<String> categories = [];
+  bool isSyncing = false;
 
   @override
   void initState() {
@@ -43,6 +44,17 @@ class _ProductListScreenState extends State<ProductListScreen> {
           .toList();
 
       categories = departmentData;
+    });
+  }
+
+  Future<void> _syncData() async {
+    setState(() {
+      isSyncing = true;
+    });
+    await _firestoreService.syncData();
+    await _fetchProductsAndCategories();
+    setState(() {
+      isSyncing = false;
     });
   }
 
@@ -79,6 +91,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
             color: Color.fromARGB(255, 48, 112, 176),
           ),
         ),
+        actions: [
+          IconButton(
+            icon: isSyncing
+                ? CircularProgressIndicator(color: Colors.white)
+                : Icon(Icons.sync),
+            onPressed: _syncData,
+          ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),

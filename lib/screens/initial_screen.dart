@@ -1,3 +1,4 @@
+import 'package:bharathbiomedpharma/services/firebase_firestore_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -80,6 +81,9 @@ class _InitialScreenState extends State<InitialScreen> {
         if (userDoc.exists) {
           // User profile exists
           debugPrint('User profile: ${userDoc.data()}');
+
+          await FirebaseFirestoreService().syncData();
+
           return user;
         }
       } catch (e) {
