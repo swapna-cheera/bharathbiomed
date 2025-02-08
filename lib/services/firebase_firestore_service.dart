@@ -85,7 +85,8 @@ class FirebaseFirestoreService {
         }
       }
       debugPrint(
-          'Completed checking for products with missing department or image URL');
+        'Completed checking for products with missing department or image URL',
+      );
     } catch (e) {
       debugPrint(
           'Error checking for products with missing department or image URL: $e');

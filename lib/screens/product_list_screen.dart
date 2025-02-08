@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
@@ -38,7 +40,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
                 id: data['id'],
                 name: data['name'],
                 info: data['info'],
-                departments: List<String>.from(data['departments']),
+                departments: List<String>.from(jsonDecode(data['departments'])),
                 imageUrl: data['imageUrl'],
               ))
           .toList();

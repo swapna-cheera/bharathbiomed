@@ -69,6 +69,31 @@ class _InitialScreenState extends State<InitialScreen> {
     );
   }
 
+  // Future<User?> _checkUserLoginStatus() async {
+  //   User? user = FirebaseAuth.instance.currentUser;
+  //   if (user != null) {
+  //     // Fetch user profile from Firestore
+  //     try {
+  //       DocumentSnapshot userDoc = await FirebaseFirestore.instance
+  //           .collection('users')
+  //           .doc(user.uid)
+  //           .get();
+  //       if (userDoc.exists) {
+  //         // User profile exists
+  //         debugPrint('User profile: ${userDoc.data()}');
+
+  //         await FirebaseFirestoreService().syncData();
+
+  //         return user;
+  //       }
+  //     } catch (e) {
+  //       debugPrint('Error fetching user profile: $e');
+  //       rethrow; // Rethrow the error to be caught by FutureBuilder
+  //     }
+  //   }
+  //   return null;
+  // }
+
   Future<User?> _checkUserLoginStatus() async {
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
@@ -77,7 +102,15 @@ class _InitialScreenState extends State<InitialScreen> {
         DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('users')
             .doc(user.uid)
-            .get();
+            .get(GetOptions(source: Source.cache)); // Read from cache
+        if (!userDoc.exists) {
+          // If not found in cache, fetch from server
+          userDoc = await FirebaseFirestore.instance
+              .collection('users')
+              .doc(user.uid)
+              .get(GetOptions(source: Source.server));
+        }
+
         if (userDoc.exists) {
           // User profile exists
           debugPrint('User profile: ${userDoc.data()}');
