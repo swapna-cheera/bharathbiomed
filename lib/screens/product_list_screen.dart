@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:quickalert/quickalert.dart';
@@ -29,22 +27,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
   }
 
   Future<void> _fetchProductsAndCategories() async {
-    await _firestoreService.deleteProductsWithMissingDepartmentOrImageUrl();
-    List<Map<String, dynamic>> productData =
-        await _firestoreService.getAllProducts();
+    List<Product> productData = await _firestoreService.getAllProducts();
     List<String> departmentData = await _firestoreService.getDepartments();
 
     setState(() {
-      allProducts = productData
-          .map((data) => Product(
-                id: data['id'],
-                name: data['name'],
-                info: data['info'],
-                departments: List<String>.from(jsonDecode(data['departments'])),
-                imageUrl: data['imageUrl'],
-              ))
-          .toList();
-
+      allProducts = productData;
       categories = departmentData;
     });
   }

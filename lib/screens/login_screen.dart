@@ -2,7 +2,9 @@ import 'package:bharathbiomedpharma/services/firebase_auth_service.dart';
 import 'package:bharathbiomedpharma/services/firebase_firestore_service.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:quickalert/quickalert.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -12,19 +14,19 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // final _emailController =
-  //     TextEditingController(text: 'swapna.balugu@gmail.com');
-  // final _passwordController = TextEditingController(text: 'Swapna@123');
-
-  final _emailController = TextEditingController(
-      // text: 'swapna.balugu@gmail.com',
-      text: 'bharathbiomedpharma@gmail.com');
-  final _passwordController = TextEditingController(
-      // text: 'Swapna@123',
-      text: 'Bharath@2024');
-
+  final _emailController =
+      TextEditingController(text: 'bharathbiomedpharma@gmail.com');
+  final _passwordController = TextEditingController(text: 'Bharath@2024');
   final _formKey = GlobalKey<FormState>();
   final FirebaseAuthService _authService = FirebaseAuthService();
+  bool _isOffline = false;
+
+  Future<void> _checkNetworkStatus() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    setState(() {
+      _isOffline = connectivityResult == ConnectivityResult.none;
+    });
+  }
 
   Future<void> _login(BuildContext context) async {
     if (_formKey.currentState!.validate()) {
@@ -34,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (user != null) {
         await FirebaseFirestoreService().syncData();
-
         // ignore: use_build_context_synchronously
         Navigator.pushReplacementNamed(context, '/productList');
       } else {
@@ -48,6 +49,15 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FlutterNativeSplash.remove();
+      _checkNetworkStatus();
+    });
   }
 
   @override
@@ -66,36 +76,57 @@ class _LoginScreenState extends State<LoginScreen> {
             children: <Widget>[
               Image.asset('assets/blogo.png', height: 100, width: 100),
               const SizedBox(height: 20),
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(labelText: 'Email'),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your email';
-                  } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                      .hasMatch(value)) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null;
-                },
-              ),
-              TextFormField(
-                controller: _passwordController,
-                decoration: const InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter your password';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                child: const Text('Login'),
-                onPressed: () =>
-                    _formKey.currentState!.validate() ? _login(context) : null,
-              ),
+              if (_isOffline) ...[
+                const Text(
+                  'Offline Mode',
+                  style: TextStyle(color: Colors.red, fontSize: 18),
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  child: const Text('Continue in Offline Mode'),
+                  onPressed: () async {
+                    await FirebaseFirestoreService().getAllProducts();
+                    // ignore: use_build_context_synchronously
+                    Navigator.pushReplacementNamed(context, '/productList');
+                  },
+                ),
+              ] else ...[
+                const Text(
+                  'Live Mode',
+                  style: TextStyle(color: Colors.red, fontSize: 18),
+                ),
+                TextFormField(
+                  controller: _emailController,
+                  decoration: const InputDecoration(labelText: 'Email'),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    } else if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                        .hasMatch(value)) {
+                      return 'Please enter a valid email address';
+                    }
+                    return null;
+                  },
+                ),
+                TextFormField(
+                  controller: _passwordController,
+                  decoration: const InputDecoration(labelText: 'Password'),
+                  obscureText: true,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your password';
+                    }
+                    return null;
+                  },
+                ),
+                const SizedBox(height: 20),
+                ElevatedButton(
+                  child: const Text('Login'),
+                  onPressed: () => _formKey.currentState!.validate()
+                      ? _login(context)
+                      : null,
+                ),
+              ],
             ],
           ),
         ),

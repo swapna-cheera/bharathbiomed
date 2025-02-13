@@ -4,13 +4,9 @@ import 'product.dart';
 class SelectedProductsChangeNotifier with ChangeNotifier {
   final List<Product> _selectedProducts = [];
 
-  List<Product> get selectedProducts {
-    return _selectedProducts;
-  }
+  List<Product> get selectedProducts => List.unmodifiable(_selectedProducts);
 
-  bool isSelected(Product product) {
-    return _selectedProducts.contains(product);
-  }
+  bool isSelected(Product product) => _selectedProducts.contains(product);
 
   void toggleSelection(Product product) {
     if (_selectedProducts.contains(product)) {
@@ -18,7 +14,7 @@ class SelectedProductsChangeNotifier with ChangeNotifier {
     } else {
       _selectedProducts.add(product);
     }
-    debugPrint('_selectedProductIds ${_selectedProducts.toString()}');
+    debugPrint('_selectedProducts ${_selectedProducts.toString()}');
     notifyListeners();
   }
 }

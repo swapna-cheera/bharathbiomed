@@ -1,6 +1,3 @@
-// import 'dart:async';
-// import 'dart:developer' as developer;
-import 'package:bharathbiomedpharma/screens/initial_screen.dart';
 import 'package:bharathbiomedpharma/services/crashlytics_service.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
@@ -16,35 +13,34 @@ import 'firebase_options.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() async {
-  BindingBase.debugZoneErrorsAreFatal = true; // Add this line
+  BindingBase.debugZoneErrorsAreFatal = true;
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
     DeviceOrientation.landscapeRight,
   ]);
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  // WidgetsFlutterBinding.ensureInitialized(); // Ensure this is called in the same zone as runApp
-  // runZonedGuarded(() async {
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
   FirebaseFirestore.instance.settings =
-      Settings(persistenceEnabled: true); // Enable offline persistence
-  // Pass all uncaught "fatal" errors from the framework to Crashlytics
+      const Settings(persistenceEnabled: true); // Enable offline persistence
+
   FlutterError.onError = (errorDetails) {
     FirebaseCrashlytics.instance.recordFlutterFatalError(errorDetails);
   };
-  // Pass all uncaught asynchronous errors that aren't handled by the Flutter framework to Crashlytics
+
   PlatformDispatcher.instance.onError = (error, stack) {
     FirebaseCrashlytics.instance.recordError(error, stack, fatal: true);
     return true;
   };
+
   CrashlyticsService.initialize();
   runApp(const MyApp());
+
   SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual, overlays: []);
-  // }, (dynamic error, dynamic stack) {
-  //   developer.log("Something went wrong!", error: error, stackTrace: stack);
-  // });
 }
 
 class MyApp extends StatelessWidget {
@@ -60,11 +56,10 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        initialRoute: '/',
+        home: const LoginScreen(),
         routes: {
-          '/': (context) => InitialScreen(),
-          '/login': (context) => LoginScreen(),
-          '/productList': (context) => ProductListScreen(),
+          '/login': (context) => const LoginScreen(),
+          '/productList': (context) => const ProductListScreen(),
         },
       ),
     );
