@@ -1,5 +1,5 @@
 name: bharathbiomedpharma
-description: "The Bharath Biomed Pharma App is your convenient gateway to explore, learn about, and purchase a wide range of high-quality pharmaceutical products."
+description: "Offline-first field app for Bharath Biomed Pharma's sales team: product catalog and slideshow presentation, doctor visit planning, orders, RCPA and compliance logging, expense claims, sales targets, and a manager/admin console."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

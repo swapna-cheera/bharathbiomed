@@ -81,6 +81,30 @@ class _StubCatalogController extends CatalogController {
   Future<void> sync({SyncProgressCallback? onProgress}) => _sync(onProgress: onProgress);
 }
 
+/// Stands in for [CatalogController] so [SyncController.pullData]/
+/// [SyncController.pushData] can each be driven independently against a
+/// controlled `pull()`/`push()`, mirroring [_StubCatalogController] above
+/// for `startSync`.
+class _StubPullPushCatalogController extends CatalogController {
+  _StubPullPushCatalogController({
+    Future<void> Function({SyncProgressCallback? onProgress})? pull,
+    Future<void> Function({SyncProgressCallback? onProgress})? push,
+  })  : _pull = pull,
+        _push = push;
+
+  final Future<void> Function({SyncProgressCallback? onProgress})? _pull;
+  final Future<void> Function({SyncProgressCallback? onProgress})? _push;
+
+  @override
+  Future<CatalogSnapshot> build() async => const CatalogSnapshot(products: [], departments: []);
+
+  @override
+  Future<void> pull({SyncProgressCallback? onProgress}) => _pull!(onProgress: onProgress);
+
+  @override
+  Future<void> push({SyncProgressCallback? onProgress}) => _push!(onProgress: onProgress);
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -193,7 +217,6 @@ void main() {
       final availability = container.read(syncControllerProvider).availability;
       expect(availability.remoteHasUpdates, isTrue);
       expect(availability.pendingUploadCount, 4);
-      expect(availability.hasSomethingToSync, isTrue);
       verify(() => doctors.hasRemoteChanges(mrUid: 'mr1')).called(1);
       verify(() => doctorVisitPlans.hasPendingUpload('mr1')).called(1);
     });
@@ -212,7 +235,9 @@ void main() {
 
       await container.read(syncControllerProvider.notifier).checkForUpdates();
 
-      expect(container.read(syncControllerProvider).availability.hasSomethingToSync, isFalse);
+      final availability = container.read(syncControllerProvider).availability;
+      expect(availability.remoteHasUpdates, isFalse);
+      expect(availability.pendingUploadCount, 0);
     });
 
     test('a failed check leaves a previously-known availability exactly as it was', () async {
@@ -283,6 +308,96 @@ void main() {
 
       final state = container.read(syncControllerProvider);
       expect(state.availability.pendingUploadCount, 5);
+      expect(state.progress, isNull);
+    });
+  });
+
+  group('pullData', () {
+    test('reports step progress while running, then clears remoteHasUpdates but leaves pendingUploadCount', () async {
+      when(() => products.hasRemoteChanges()).thenAnswer((_) async => true);
+      when(() => usageSessions.countPendingUpload()).thenAnswer((_) async => 2);
+      final progressLabels = <String>[];
+      final container = await buildContainer(user: buildUser('mr1'), extra: [
+        catalogControllerProvider.overrideWith(() => _StubPullPushCatalogController(
+              pull: ({onProgress}) async {
+                onProgress?.call(0, 2, 'Downloading catalog…');
+                onProgress?.call(2, 2, 'Download complete');
+              },
+            )),
+      ]);
+      await container.read(syncControllerProvider.notifier).checkForUpdates();
+      expect(container.read(syncControllerProvider).availability.remoteHasUpdates, isTrue);
+      container.listen(syncControllerProvider, (previous, next) {
+        if (next.progress != null) progressLabels.add(next.progress!.label);
+      });
+
+      await container.read(syncControllerProvider.notifier).pullData();
+
+      expect(progressLabels, ['Starting download…', 'Downloading catalog…', 'Download complete']);
+      final state = container.read(syncControllerProvider);
+      expect(state.progress, isNull);
+      expect(state.availability.remoteHasUpdates, isFalse);
+      expect(state.availability.pendingUploadCount, 2);
+    });
+
+    test('keeps the previously-known availability, clears progress, and rethrows on failure', () async {
+      when(() => usageSessions.countPendingUpload()).thenAnswer((_) async => 5);
+      final container = await buildContainer(user: buildUser('mr1'), extra: [
+        catalogControllerProvider.overrideWith(() => _StubPullPushCatalogController(
+              pull: ({onProgress}) async => throw Exception('pull failed'),
+            )),
+      ]);
+      await container.read(syncControllerProvider.notifier).checkForUpdates();
+
+      await expectLater(container.read(syncControllerProvider.notifier).pullData(), throwsException);
+
+      final state = container.read(syncControllerProvider);
+      expect(state.availability.pendingUploadCount, 5);
+      expect(state.progress, isNull);
+    });
+  });
+
+  group('pushData', () {
+    test('reports step progress while running, then clears pendingUploadCount but leaves remoteHasUpdates', () async {
+      when(() => products.hasRemoteChanges()).thenAnswer((_) async => true);
+      when(() => usageSessions.countPendingUpload()).thenAnswer((_) async => 2);
+      final progressLabels = <String>[];
+      final container = await buildContainer(user: buildUser('mr1'), extra: [
+        catalogControllerProvider.overrideWith(() => _StubPullPushCatalogController(
+              push: ({onProgress}) async {
+                onProgress?.call(0, 2, 'Uploading usage data…');
+                onProgress?.call(2, 2, 'Upload complete');
+              },
+            )),
+      ]);
+      await container.read(syncControllerProvider.notifier).checkForUpdates();
+      expect(container.read(syncControllerProvider).availability.pendingUploadCount, 2);
+      container.listen(syncControllerProvider, (previous, next) {
+        if (next.progress != null) progressLabels.add(next.progress!.label);
+      });
+
+      await container.read(syncControllerProvider.notifier).pushData();
+
+      expect(progressLabels, ['Starting upload…', 'Uploading usage data…', 'Upload complete']);
+      final state = container.read(syncControllerProvider);
+      expect(state.progress, isNull);
+      expect(state.availability.pendingUploadCount, 0);
+      expect(state.availability.remoteHasUpdates, isTrue);
+    });
+
+    test('keeps the previously-known availability, clears progress, and rethrows on failure', () async {
+      when(() => products.hasRemoteChanges()).thenAnswer((_) async => true);
+      final container = await buildContainer(user: buildUser('mr1'), extra: [
+        catalogControllerProvider.overrideWith(() => _StubPullPushCatalogController(
+              push: ({onProgress}) async => throw Exception('push failed'),
+            )),
+      ]);
+      await container.read(syncControllerProvider.notifier).checkForUpdates();
+
+      await expectLater(container.read(syncControllerProvider.notifier).pushData(), throwsException);
+
+      final state = container.read(syncControllerProvider);
+      expect(state.availability.remoteHasUpdates, isTrue);
       expect(state.progress, isNull);
     });
   });

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/user_facing_error.dart';
+import '../../core/widgets/app_list_card.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../domain/models/employee.dart';
 import '../admin/usage_format.dart';
 import 'rcpa_dashboard_controller.dart';
@@ -25,14 +27,14 @@ class EmployeeRcpaEntriesScreen extends ConsumerWidget {
         data: (dashboard) {
           final entries = dashboard.entriesByEmployee[employee.uid] ?? const [];
           if (entries.isEmpty) {
-            return const Center(child: Text('No entries logged yet.'));
+            return const EmptyState(icon: Icons.checklist_outlined, message: 'No entries logged yet.');
           }
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             itemCount: entries.length,
             itemBuilder: (context, index) {
               final entry = entries[index];
-              return ListTile(
+              return AppListCard(
                 title: Text(entry.pharmacyName),
                 subtitle: Text(
                   '${entry.auditDate} • logged ${formatDateTime(entry.createdAt)}\n'

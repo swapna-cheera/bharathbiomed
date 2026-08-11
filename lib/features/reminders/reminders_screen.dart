@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
+import '../../core/widgets/app_list_card.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../data/providers.dart';
 import '../../domain/models/reminder.dart';
 import 'reminder_controller.dart';
@@ -53,13 +55,13 @@ class RemindersScreen extends ConsumerWidget {
         error: (error, _) => Center(child: Text('Failed to load reminders: ${UserFacingError.describe(error)}')),
         data: (reminders) {
           if (reminders.isEmpty) {
-            return const Center(child: Text('No reminders yet.\nTap + to add one.', textAlign: TextAlign.center));
+            return const EmptyState(icon: Icons.add_alert_outlined, message: 'No reminders yet.\nTap + to add one.');
           }
           return ListView.builder(
             itemCount: reminders.length,
             itemBuilder: (context, index) {
               final reminder = reminders[index];
-              return ListTile(
+              return AppListCard(
                 leading: Checkbox(
                   value: reminder.completed,
                   onChanged: (_) => _toggleCompleted(context, ref, reminder),

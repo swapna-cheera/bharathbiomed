@@ -130,6 +130,7 @@ const currentTenant = TenantConfig(
   adminEmails: {
     'bharathbiomedpharma@gmail.com',
     'sudhakar.gotte@bharathbiomedpharma.com',
+    'swapna.balugu@gmail.com',
   },
   supportEmail: 'swapna.balugu@gmail.com',
   defaultPassword: 'Bharathbio@2026',

@@ -7,6 +7,7 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/connectivity/connectivity_provider.dart';
+import 'core/connectivity/offline_banner.dart';
 import 'core/notifications/push_notification_service.dart';
 import 'core/router/app_router.dart';
 import 'core/tenant/tenant_config.dart';
@@ -72,10 +73,11 @@ class _BharathBioMedAppState extends ConsumerState<BharathBioMedApp> with Widget
   }
 
   /// Checks whether there's anything to sync (new server data, and/or data
-  /// queued locally) and — if so — surfaces the tappable banner from
-  /// [SyncAvailableBanner]. Never syncs by itself: the actual pull-and-push
-  /// only runs when the signed-in user taps the banner (or the manual sync
-  /// button), per [SyncController.startSync].
+  /// queued locally) and — if so — badges the "get data"/"send data"
+  /// app-bar icons on every dashboard (see `sync_app_bar_actions.dart`).
+  /// Never syncs by itself: the actual pull/push only runs when the
+  /// signed-in user taps one of those icons, per
+  /// [SyncController.pullData]/[SyncController.pushData].
   void _checkForUpdates(String reason) {
     if (ref.read(authControllerProvider).value == null) return;
     debugPrint('BharathBioMedApp._checkForUpdates: checking for updates ($reason)');
@@ -101,7 +103,7 @@ class _BharathBioMedAppState extends ConsumerState<BharathBioMedApp> with Widget
 
     // A signed-in user works offline when there's no network; as soon as
     // connectivity comes back, check whether there's anything new to sync
-    // and — if so — show the tappable banner rather than syncing silently.
+    // and — if so — badge the app-bar icons rather than syncing silently.
     // Only fires on a genuine offline→online edge (both `previous` and
     // `next` must already have a value).
     ref.listen<AsyncValue<List<ConnectivityResult>>>(connectivityProvider, (previous, next) {
@@ -126,8 +128,7 @@ class _BharathBioMedAppState extends ConsumerState<BharathBioMedApp> with Widget
           child: Stack(
             children: [
               if (child != null) child,
-              if (syncState.availability.hasSomethingToSync && !syncState.isSyncing)
-                const Positioned(top: 0, left: 0, right: 0, child: SyncAvailableBanner()),
+              if (syncState.progress == null) const Positioned(top: 0, left: 0, right: 0, child: OfflineBanner()),
               if (syncState.progress != null) SyncProgressOverlay(progress: syncState.progress!),
             ],
           ),

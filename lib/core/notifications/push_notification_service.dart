@@ -15,6 +15,7 @@ import '../../firebase_options.dart';
 import '../auth/admin_access.dart';
 import '../error/app_logger.dart';
 import '../../features/auth/auth_controller.dart';
+import '../router/app_router.dart';
 
 /// Every device subscribes to this topic; the `onProductsChanged` /
 /// `onDepartmentsChanged` Cloud Functions (functions/src/index.ts) publish to
@@ -148,16 +149,21 @@ class PushNotificationService {
       unawaited(_saveDeviceToken(uid, token));
     });
 
-    // App already running, in the foreground or background: the OS delivers
-    // straight to these listeners rather than the top-level background
-    // handler.
-    FirebaseMessaging.onMessage.listen(_handleMessage);
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+    // App already running in the foreground: the OS delivers straight to
+    // this listener rather than the top-level background handler. Just
+    // re-sync in place — the user didn't ask to go anywhere, so don't yank
+    // them off whatever screen they're looking at.
+    FirebaseMessaging.onMessage.listen((message) => _handleMessage(message, navigate: false));
 
-    // App was fully terminated and this push is why it launched.
+    // The other two cases both mean the user explicitly tapped the
+    // notification (from the background, or from fully terminated) — that's
+    // a clear "take me there" signal, so navigate to whatever the push is
+    // about once its data has synced.
+    FirebaseMessaging.onMessageOpenedApp.listen((message) => _handleMessage(message, navigate: true));
+
     debugPrint('PushNotificationService.initialize: checking for initial message');
     final initialMessage = await messaging.getInitialMessage();
-    if (initialMessage != null) unawaited(_handleMessage(initialMessage));
+    if (initialMessage != null) unawaited(_handleMessage(initialMessage, navigate: true));
   }
 
   /// Registers this device's current FCM token against [user]'s uid, if
@@ -207,9 +213,14 @@ class PushNotificationService {
     }
   }
 
-  Future<void> _handleMessage(RemoteMessage message) async {
+  /// Refreshes whatever local cache this push is about, then — only when
+  /// [navigate] is true, i.e. the user tapped the notification rather than
+  /// it merely arriving in the foreground — takes them to the screen that
+  /// data now lives on, so tapping a push actually goes somewhere instead of
+  /// silently syncing in the background.
+  Future<void> _handleMessage(RemoteMessage message, {required bool navigate}) async {
     final type = message.data['type'];
-    debugPrint('PushNotificationService._handleMessage: received message type=$type');
+    debugPrint('PushNotificationService._handleMessage: received message type=$type navigate=$navigate');
     switch (type) {
       case _catalogUpdatedType:
         try {
@@ -220,6 +231,7 @@ class PushNotificationService {
           debugPrint('PushNotificationService._handleMessage: foreground sync failed error=$error');
           AppLogger.error('PushNotification', 'foreground sync failed', error: error, stackTrace: stackTrace);
         }
+        if (navigate) _ref.read(routerProvider).push('/catalog');
       case _doctorRequestReviewedType:
         // A doctor this MR proposed was just approved/rejected — refresh
         // their local doctor cache so an approval shows up without them
@@ -231,6 +243,7 @@ class PushNotificationService {
           debugPrint('PushNotificationService._handleMessage: doctor sync failed error=$error');
           AppLogger.error('PushNotification', 'doctor sync after review failed', error: error, stackTrace: stackTrace);
         }
+        if (navigate) _ref.read(routerProvider).push('/doctors');
     }
   }
 }

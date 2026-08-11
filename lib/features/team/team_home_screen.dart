@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../core/widgets/dashboard_tile.dart';
+import '../../core/widgets/section_header.dart';
 import '../../domain/models/permission.dart';
 import 'team_access.dart';
 
@@ -14,7 +16,9 @@ import 'team_access.dart';
 /// every screen behind it simply shows an empty state if the signed-in user
 /// doesn't actually manage anyone (see `resolveVisibleEmployees`) or lacks
 /// the specific permission that screen's actions need (e.g.
-/// `approve_expenses`).
+/// `approve_expenses`). Uses the same icon+label grid as the Admin/MR home
+/// screens (see `dashboard_tile.dart`) so all three logins share one visual
+/// language.
 class TeamHomeScreen extends ConsumerWidget {
   const TeamHomeScreen({super.key});
 
@@ -25,98 +29,82 @@ class TeamHomeScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('My Team')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.bar_chart),
-              title: const Text('Usage & Location'),
-              subtitle: const Text("See your team's app usage sessions and last known location."),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/usage'),
+          const SectionHeader(title: 'Overview'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: DashboardGrid(
+              children: [
+                DashboardTile(
+                  icon: Icons.bar_chart,
+                  label: 'Usage & Location',
+                  onTap: () => context.push('/team/usage'),
+                ),
+                DashboardTile(
+                  icon: Icons.gavel_outlined,
+                  label: 'Compliance Dashboard',
+                  onTap: () => context.push('/team/compliance'),
+                ),
+              ],
             ),
           ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.local_hospital_outlined),
-              title: const Text('Visit Logs'),
-              subtitle: const Text("See your team's logged doctor visits and feedback."),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/visit-logs'),
+          const SectionHeader(title: 'Field Work'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: DashboardGrid(
+              children: [
+                DashboardTile(
+                  icon: Icons.local_hospital_outlined,
+                  label: 'Visit Logs',
+                  onTap: () => context.push('/team/visit-logs'),
+                ),
+                DashboardTile(
+                  icon: Icons.map_outlined,
+                  label: 'Visit Plan Approvals',
+                  onTap: () => context.push('/team/visit-plans'),
+                ),
+                DashboardTile(
+                  icon: Icons.receipt_long_outlined,
+                  label: 'Order Workflow',
+                  onTap: () => context.push('/team/orders'),
+                ),
+                if (canApproveRequests)
+                  DashboardTile(
+                    icon: Icons.how_to_reg_outlined,
+                    label: 'Doctor Requests',
+                    onTap: () => context.push('/doctor-requests'),
+                  ),
+                if (canApproveRequests)
+                  DashboardTile(
+                    icon: Icons.pending_actions_outlined,
+                    label: 'Agency / Pharmacy Requests',
+                    onTap: () => context.push('/entity-requests'),
+                  ),
+              ],
             ),
           ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.receipt_long_outlined),
-              title: const Text('Order Workflow'),
-              subtitle: const Text('Approve, reject, and dispatch orders from your team.'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/orders'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.track_changes_outlined),
-              title: const Text('Team Targets'),
-              subtitle: const Text("Set and track your team's monthly targets."),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/targets'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.fact_check_outlined),
-              title: const Text('RCPA Entries'),
-              subtitle: const Text("See your team's retail chemist prescription audits."),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/rcpa'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.request_page_outlined),
-              title: const Text('Expense Claims'),
-              subtitle: const Text("Approve or reject your team's TA/DA expense claims."),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/expenses'),
-            ),
-          ),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.map_outlined),
-              title: const Text('Visit Plan Approvals'),
-              subtitle: const Text("Review your team's submitted weekly beat/route plans."),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/visit-plans'),
-            ),
-          ),
-          if (canApproveRequests) ...[
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.local_hospital_outlined),
-                title: const Text('Doctor Requests'),
-                subtitle: const Text('Review proposed doctor additions/edits from any MR.'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () => context.push('/doctor-requests'),
-              ),
-            ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.fact_check_outlined),
-                title: const Text('Agency / Pharmacy Requests'),
-                subtitle: const Text('Review proposed new agencies/pharmacies from any MR.'),
-                trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                onTap: () => context.push('/entity-requests'),
-              ),
-            ),
-          ],
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.gavel_outlined),
-              title: const Text('Compliance Dashboard'),
-              subtitle: const Text('Per-doctor UCPMP gift/sponsorship totals for this year.'),
-              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-              onTap: () => context.push('/team/compliance'),
+          const SectionHeader(title: 'Performance & Approvals'),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: DashboardGrid(
+              children: [
+                DashboardTile(
+                  icon: Icons.track_changes_outlined,
+                  label: 'Team Targets',
+                  onTap: () => context.push('/team/targets'),
+                ),
+                DashboardTile(
+                  icon: Icons.checklist_outlined,
+                  label: 'RCPA Entries',
+                  onTap: () => context.push('/team/rcpa'),
+                ),
+                DashboardTile(
+                  icon: Icons.request_page_outlined,
+                  label: 'Expense Claims',
+                  onTap: () => context.push('/team/expenses'),
+                ),
+              ],
             ),
           ),
         ],

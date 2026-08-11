@@ -82,7 +82,16 @@ class _TodayVisitsScreenState extends ConsumerState<TodayVisitsScreen> {
     final loggedDoctorIds = _todaysLogs.map((log) => log.doctorId).toSet();
 
     return Scaffold(
-      appBar: AppBar(title: Text("Today's Visits — $todayLabel")),
+      appBar: AppBar(
+        title: Text("Today's Visits — $todayLabel"),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.storefront_outlined),
+            tooltip: 'Product Catalog',
+            onPressed: () => context.push('/catalog'),
+          ),
+        ],
+      ),
       body: doctorsAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => Center(child: Text('Failed to load doctors: ${UserFacingError.describe(error)}')),
@@ -118,29 +127,32 @@ class _TodayVisitsScreenState extends ConsumerState<TodayVisitsScreen> {
 
             return _loadingLogs
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    itemCount: plannedDoctors.length + 1,
-                    itemBuilder: (context, index) {
-                      if (index == plannedDoctors.length) {
-                        return Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: OutlinedButton.icon(
-                            onPressed: () => _addAdHocVisit(doctors, plannedIds),
-                            icon: const Icon(Icons.add),
-                            label: const Text('Log a visit for another doctor'),
-                          ),
+                : RefreshIndicator(
+                    onRefresh: _loadLogs,
+                    child: ListView.builder(
+                      itemCount: plannedDoctors.length + 1,
+                      itemBuilder: (context, index) {
+                        if (index == plannedDoctors.length) {
+                          return Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: OutlinedButton.icon(
+                              onPressed: () => _addAdHocVisit(doctors, plannedIds),
+                              icon: const Icon(Icons.add),
+                              label: const Text('Log a visit for another doctor'),
+                            ),
+                          );
+                        }
+                        final doctor = plannedDoctors[index];
+                        final logged = loggedDoctorIds.contains(doctor.id);
+                        return ListTile(
+                          title: Text(doctor.name),
+                          subtitle: Text(doctor.hospitalName),
+                          trailing: logged
+                              ? const Icon(Icons.check_circle, color: Colors.green)
+                              : OutlinedButton(onPressed: () => _logVisit(doctor), child: const Text('Log Visit')),
                         );
-                      }
-                      final doctor = plannedDoctors[index];
-                      final logged = loggedDoctorIds.contains(doctor.id);
-                      return ListTile(
-                        title: Text(doctor.name),
-                        subtitle: Text(doctor.hospitalName),
-                        trailing: logged
-                            ? const Icon(Icons.check_circle, color: Colors.green)
-                            : OutlinedButton(onPressed: () => _logVisit(doctor), child: const Text('Log Visit')),
-                      );
-                    },
+                      },
+                    ),
                   );
           },
         ),

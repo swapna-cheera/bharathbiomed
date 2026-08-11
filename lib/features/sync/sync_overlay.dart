@@ -1,44 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'sync_controller.dart';
-
-/// Slim top banner shown app-wide whenever there's something to sync (new
-/// server data and/or data queued locally) and no sync is currently
-/// running. Tap anywhere on it to start [SyncController.startSync].
-class SyncAvailableBanner extends ConsumerWidget {
-  const SyncAvailableBanner({super.key});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final scheme = Theme.of(context).colorScheme;
-    return SafeArea(
-      bottom: false,
-      child: Material(
-        color: scheme.primaryContainer,
-        child: InkWell(
-          onTap: () => ref.read(syncControllerProvider.notifier).startSync(),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                Icon(Icons.sync, color: scheme.onPrimaryContainer, size: 20),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'New data available — tap to sync',
-                    style: TextStyle(color: scheme.onPrimaryContainer, fontWeight: FontWeight.w600),
-                  ),
-                ),
-                Icon(Icons.chevron_right, color: scheme.onPrimaryContainer),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 /// Full-screen blocking overlay shown app-wide while a sync is running: a
 /// progress bar, percentage, current step label, and an explicit warning not

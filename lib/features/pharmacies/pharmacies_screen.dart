@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
 import '../../core/theme/accent_palette.dart';
+import '../../core/widgets/app_list_card.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../data/providers.dart';
 import '../../domain/models/pharmacy.dart';
 import '../team/team_access.dart';
@@ -106,40 +108,56 @@ class _PharmaciesScreenState extends ConsumerState<PharmaciesScreen> {
                   Center(child: Text('Failed to load pharmacies: ${UserFacingError.describe(error)}')),
               data: (pharmacies) {
                 if (pharmacies.isEmpty) {
-                  return const Center(
-                    child:
-                        Text('No pharmacies yet.\nTap "Add Pharmacy" below to propose one.', textAlign: TextAlign.center),
+                  return RefreshIndicator(
+                    onRefresh: _sync,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        EmptyState(icon: Icons.local_pharmacy_outlined, message: 'No pharmacies yet.\nTap "Add Pharmacy" below to propose one.'),
+                      ],
+                    ),
                   );
                 }
                 final filtered = _applyFilter(pharmacies);
                 if (filtered.isEmpty) {
-                  return const Center(child: Text('No pharmacies match this search.'));
+                  return RefreshIndicator(
+                    onRefresh: _sync,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        EmptyState(icon: Icons.search_off, message: 'No pharmacies match this search.'),
+                      ],
+                    ),
+                  );
                 }
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final pharmacy = filtered[index];
-                    return ListTile(
-                      onTap: canManage ? () => context.push('/pharmacies/edit', extra: pharmacy) : null,
-                      leading: CircleAvatar(
-                        backgroundColor: AccentPalette.forLabel(pharmacy.name).withValues(alpha: 0.15),
-                        foregroundColor: AccentPalette.forLabel(pharmacy.name),
-                        child: Text(pharmacy.name.isNotEmpty ? pharmacy.name[0].toUpperCase() : '?'),
-                      ),
-                      title: Text(pharmacy.name, style: TextStyle(color: pharmacy.active ? null : Colors.grey)),
-                      subtitle: Text(
-                        '${pharmacy.linkedDoctorIds.length} linked doctor${pharmacy.linkedDoctorIds.length == 1 ? '' : 's'}'
-                        '${pharmacy.active ? '' : ' • Inactive'}',
-                      ),
-                      trailing: isOfficeAdmin
-                          ? IconButton(
-                              icon: Icon(pharmacy.active ? Icons.block : Icons.check_circle_outline),
-                              tooltip: pharmacy.active ? 'Deactivate' : 'Reactivate',
-                              onPressed: () => _setActive(pharmacy, active: !pharmacy.active),
-                            )
-                          : (canManage ? const Icon(Icons.arrow_forward_ios, size: 16) : null),
-                    );
-                  },
+                return RefreshIndicator(
+                  onRefresh: _sync,
+                  child: ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final pharmacy = filtered[index];
+                      return AppListCard(
+                        onTap: canManage ? () => context.push('/pharmacies/edit', extra: pharmacy) : null,
+                        leading: CircleAvatar(
+                          backgroundColor: AccentPalette.forLabel(pharmacy.name).withValues(alpha: 0.15),
+                          foregroundColor: AccentPalette.forLabel(pharmacy.name),
+                          child: Text(pharmacy.name.isNotEmpty ? pharmacy.name[0].toUpperCase() : '?'),
+                        ),
+                        title: Text(pharmacy.name, style: TextStyle(color: pharmacy.active ? null : Colors.grey)),
+                        subtitle: Text(
+                          '${pharmacy.linkedDoctorIds.length} linked doctor${pharmacy.linkedDoctorIds.length == 1 ? '' : 's'}'
+                          '${pharmacy.active ? '' : ' • Inactive'}',
+                        ),
+                        trailing: isOfficeAdmin
+                            ? IconButton(
+                                icon: Icon(pharmacy.active ? Icons.block : Icons.check_circle_outline),
+                                tooltip: pharmacy.active ? 'Deactivate' : 'Reactivate',
+                                onPressed: () => _setActive(pharmacy, active: !pharmacy.active),
+                              )
+                            : (canManage ? const Icon(Icons.arrow_forward_ios, size: 16) : null),
+                      );
+                    },
+                  ),
                 );
               },
             ),

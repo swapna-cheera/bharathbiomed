@@ -18,10 +18,12 @@ class DepartmentProductsScreen extends ConsumerStatefulWidget {
   final String department;
 
   @override
-  ConsumerState<DepartmentProductsScreen> createState() => _DepartmentProductsScreenState();
+  ConsumerState<DepartmentProductsScreen> createState() =>
+      _DepartmentProductsScreenState();
 }
 
-class _DepartmentProductsScreenState extends ConsumerState<DepartmentProductsScreen> {
+class _DepartmentProductsScreenState
+    extends ConsumerState<DepartmentProductsScreen> {
   final _searchController = TextEditingController();
 
   @override
@@ -31,14 +33,21 @@ class _DepartmentProductsScreenState extends ConsumerState<DepartmentProductsScr
     super.dispose();
   }
 
-  Future<void> _deleteProduct(BuildContext context, WidgetRef ref, Product product) async {
-    debugPrint('DepartmentProductsScreen._deleteProduct: deleting product id=${product.id}');
+  Future<void> _deleteProduct(
+      BuildContext context, WidgetRef ref, Product product) async {
+    debugPrint(
+        'DepartmentProductsScreen._deleteProduct: deleting product id=${product.id}');
     try {
-      await ref.read(adminCatalogControllerProvider.notifier).deleteProduct(product.id);
-      debugPrint('DepartmentProductsScreen._deleteProduct: deleted product id=${product.id}');
+      await ref
+          .read(adminCatalogControllerProvider.notifier)
+          .deleteProduct(product.id);
+      debugPrint(
+          'DepartmentProductsScreen._deleteProduct: deleted product id=${product.id}');
     } catch (error, stackTrace) {
-      debugPrint('DepartmentProductsScreen._deleteProduct: delete failed error=$error');
-      AppLogger.error('DepartmentProducts', 'deleteProduct failed', error: error, stackTrace: stackTrace);
+      debugPrint(
+          'DepartmentProductsScreen._deleteProduct: delete failed error=$error');
+      AppLogger.error('DepartmentProducts', 'deleteProduct failed',
+          error: error, stackTrace: stackTrace);
       if (!context.mounted) return;
       QuickAlert.show(
         context: context,
@@ -67,8 +76,11 @@ class _DepartmentProductsScreenState extends ConsumerState<DepartmentProductsScr
               backgroundColor: Colors.white,
               foregroundColor: accent,
               child: Text(
-                widget.department.isNotEmpty ? widget.department[0].toUpperCase() : '?',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
+                widget.department.isNotEmpty
+                    ? widget.department[0].toUpperCase()
+                    : '?',
+                style:
+                    const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
               ),
             ),
             const SizedBox(width: 10),
@@ -93,40 +105,54 @@ class _DepartmentProductsScreenState extends ConsumerState<DepartmentProductsScr
           Expanded(
             child: catalog.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) => Center(child: Text('Failed to load products: ${UserFacingError.describe(error)}')),
+              error: (error, _) => Center(
+                  child: Text(
+                      'Failed to load products: ${UserFacingError.describe(error)}')),
               data: (snapshot) {
                 final query = _searchController.text.trim().toLowerCase();
                 final products = snapshot.products
                     .where((p) => p.departments.containsKey(widget.department))
-                    .where((p) => query.isEmpty || p.name.toLowerCase().contains(query))
+                    .where((p) =>
+                        query.isEmpty || p.name.toLowerCase().contains(query))
                     .toList()
-                  ..sort((a, b) => a.positionIn(widget.department).compareTo(b.positionIn(widget.department)));
+                  ..sort((a, b) => a
+                      .positionIn(widget.department)
+                      .compareTo(b.positionIn(widget.department)));
 
                 if (products.isEmpty) {
                   return Center(
                     child: Text(
-                      query.isEmpty ? 'No products in this department yet.' : 'No products match this search.',
+                      query.isEmpty
+                          ? 'No products in this department yet.'
+                          : 'No products match this search.',
                     ),
                   );
                 }
 
-                return GridView.builder(
-                  padding: const EdgeInsets.all(8.0),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 8.0,
-                    crossAxisSpacing: 8.0,
-                    childAspectRatio: 16 / 9,
+                return RefreshIndicator(
+                  onRefresh: () => ref
+                      .read(adminCatalogControllerProvider.notifier)
+                      .refresh(),
+                  child: GridView.builder(
+                    padding: const EdgeInsets.all(8.0),
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 8.0,
+                      crossAxisSpacing: 8.0,
+                      childAspectRatio: 16 / 9,
+                    ),
+                    itemCount: products.length,
+                    itemBuilder: (context, index) {
+                      final product = products[index];
+                      return AdminProductTile(
+                        product: product,
+                        onTap: () => context.push('/admin/products/edit',
+                            extra: product),
+                        onDelete: () => _deleteProduct(context, ref, product),
+                      );
+                    },
                   ),
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    final product = products[index];
-                    return AdminProductTile(
-                      product: product,
-                      onTap: () => context.push('/admin/products/edit', extra: product),
-                      onDelete: () => _deleteProduct(context, ref, product),
-                    );
-                  },
                 );
               },
             ),

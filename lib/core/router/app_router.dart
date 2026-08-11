@@ -30,6 +30,7 @@ import '../../features/auth/auth_controller.dart';
 import '../../features/auth/change_password_screen.dart';
 import '../../features/auth/login_screen.dart';
 import '../../features/catalog/product_list_screen.dart';
+import '../../features/dashboard/dashboard_screen.dart';
 import '../../features/doctors/doctor_detail_screen.dart';
 import '../../features/doctors/doctor_form_screen.dart';
 import '../../features/doctors/mr_doctors_screen.dart';
@@ -90,7 +91,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       final user = ref.read(authRepositoryProvider).currentUser;
       final isLoggedIn = user != null;
       final onLoginScreen = state.matchedLocation == '/login';
-      if (isLoggedIn && onLoginScreen) return isAdminEmail(user.email) ? '/admin' : '/catalog';
+      if (isLoggedIn && onLoginScreen) return isAdminEmail(user.email) ? '/admin' : '/home';
 
       // Changing your password requires a signed-in user to reauthenticate
       // against; reaching this route while signed out (deep link, restored
@@ -117,7 +118,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // "Known gap", now closed).
       final onAdminRoute = state.matchedLocation.startsWith('/admin');
       if (onAdminRoute && !isAdminEmail(user?.email)) {
-        if (!ref.read(isOfficeAdminProvider)) return '/catalog';
+        if (!ref.read(isOfficeAdminProvider)) return '/home';
         const officeAdminMobileRoutes = {
           '/admin/inventory',
           '/admin/inventory/batches',
@@ -142,7 +143,7 @@ final routerProvider = Provider<GoRouter>((ref) {
           isLoggedIn && !isAdminEmail(user.email) && employee != null && !employee.profileCompleted;
       const completeProfilePath = '/account/complete-profile';
       if (needsProfileCompletion && state.matchedLocation != completeProfilePath) return completeProfilePath;
-      if (!needsProfileCompletion && state.matchedLocation == completeProfilePath) return '/catalog';
+      if (!needsProfileCompletion && state.matchedLocation == completeProfilePath) return '/home';
 
       // A few routes require data passed via `extra` (which product to show
       // full-screen, which employee/product/doctor to edit). `extra` doesn't
@@ -151,7 +152,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       // safe parent screen instead of letting the builder's `as` cast crash.
       switch (state.matchedLocation) {
         case '/slideshow':
-          if (state.extra is! List<Product>) return '/catalog';
+          if (state.extra is! List<Product>) return '/home';
         case '/admin/departments/products':
           if (state.extra is! String) return '/admin';
         case '/admin/employees/edit':
@@ -186,6 +187,7 @@ final routerProvider = Provider<GoRouter>((ref) {
     },
     routes: [
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+      GoRoute(path: '/home', builder: (context, state) => const DashboardScreen()),
       GoRoute(path: '/catalog', builder: (context, state) => const ProductListScreen()),
       GoRoute(path: '/account/change-password', builder: (context, state) => const ChangePasswordScreen()),
       GoRoute(path: '/account/profile', builder: (context, state) => const ProfileScreen()),

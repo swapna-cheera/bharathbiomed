@@ -15,6 +15,7 @@ const ADMIN_EMAILS = new Set([
   // TENANT-ADMIN-EMAILS:START
   "bharathbiomedpharma@gmail.com",
   "sudhakar.gotte@bharathbiomedpharma.com",
+  "swapna.balugu@gmail.com",
   // TENANT-ADMIN-EMAILS:END
 ]);
 

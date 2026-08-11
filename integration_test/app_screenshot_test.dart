@@ -1,5 +1,6 @@
-// Drives the app through login -> catalog -> slideshow on a real device or
-// emulator and captures Play Store-ready screenshots at each screen.
+// Drives the app through login -> dashboard -> catalog -> slideshow -> a few
+// key feature screens on a real device or emulator, capturing Play
+// Store-ready screenshots at each one.
 //
 // Credentials are passed in at run time via --dart-define so nothing ends up
 // in source control (see docs/PLAY_STORE_CHECKLIST.md for the full command).
@@ -35,12 +36,11 @@ void main() {
 
     app.main();
     await tester.pumpAndSettle(const Duration(seconds: 3));
+    await binding.convertFlutterSurfaceToImage();
+    await tester.pumpAndSettle();
 
     // --- 1. Login screen ---
     await binding.takeScreenshot('01_login');
-
-    await tester.tap(find.text('Sign in to download / sync data'));
-    await tester.pumpAndSettle();
 
     final formFields = find.byType(TextFormField);
     await tester.enterText(formFields.first, _testEmail);
@@ -49,8 +49,20 @@ void main() {
     // Covers sign-in + the sync it triggers + the brief confirmation dialog.
     await tester.pumpAndSettle(const Duration(seconds: 8));
 
-    // --- 2. Catalog screen ---
-    await binding.takeScreenshot('02_catalog');
+    final okayButton = find.text('Okay');
+    if (okayButton.evaluate().isNotEmpty) {
+      await tester.tap(okayButton);
+      await tester.pumpAndSettle();
+    }
+
+    // --- 2. Dashboard home screen ---
+    await binding.takeScreenshot('02_home');
+
+    // --- 3/4/5. Product catalog -> selection -> slideshow ---
+    await tester.ensureVisible(find.text('Product Catalog'));
+    await tester.tap(find.text('Product Catalog'));
+    await tester.pumpAndSettle();
+    await binding.takeScreenshot('03_catalog');
 
     final productCards = find.byType(ProductCard);
     if (productCards.evaluate().length > 1) {
@@ -58,15 +70,39 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(productCards.at(1));
       await tester.pumpAndSettle();
-
-      // --- 3. Catalog with a selection made ---
-      await binding.takeScreenshot('03_catalog_selected');
+      await binding.takeScreenshot('04_catalog_selected');
 
       await tester.tap(find.byIcon(Icons.play_arrow));
       await tester.pumpAndSettle(const Duration(seconds: 2));
+      await binding.takeScreenshot('05_slideshow');
 
-      // --- 4. Slideshow ---
-      await binding.takeScreenshot('04_slideshow');
+      await tester.pageBack();
+      await tester.pumpAndSettle();
     }
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // --- 6. My Doctors ---
+    await tester.ensureVisible(find.text('My Doctors'));
+    await tester.tap(find.text('My Doctors'));
+    await tester.pumpAndSettle();
+    await binding.takeScreenshot('06_doctors');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // --- 7. My Orders ---
+    await tester.ensureVisible(find.text('My Orders'));
+    await tester.tap(find.text('My Orders'));
+    await tester.pumpAndSettle();
+    await binding.takeScreenshot('07_orders');
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+
+    // --- 8. RCPA Entries ---
+    await tester.ensureVisible(find.text('RCPA Entries'));
+    await tester.tap(find.text('RCPA Entries'));
+    await tester.pumpAndSettle();
+    await binding.takeScreenshot('08_rcpa');
   });
 }

@@ -21,7 +21,8 @@ service cloud.firestore {
       return isSignedIn() && request.auth.token.email in [
         // TENANT-ADMIN-EMAILS:START
         'bharathbiomedpharma@gmail.com',
-        'sudhakar.gotte@bharathbiomedpharma.com'
+        'sudhakar.gotte@bharathbiomedpharma.com',
+        'swapna.balugu@gmail.com'
         // TENANT-ADMIN-EMAILS:END
       ];
     }

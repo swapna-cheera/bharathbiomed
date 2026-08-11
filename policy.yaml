@@ -1,0 +1,10 @@
+name: organizations/306760367732/policies/iam.managed.allowedPolicyMembers
+spec:
+  rules:
+    - enforce: true
+      parameters:
+        allowedMemberSubjects:
+          - user:syncosolvesolutionspvtltd@gmail.com
+          - user:swapna.balugu@gmail.com
+        allowedPrincipalSets:
+          - //cloudresourcemanager.googleapis.com/organizations/306760367732

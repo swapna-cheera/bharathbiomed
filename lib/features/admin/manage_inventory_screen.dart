@@ -20,7 +20,8 @@ class ManageInventoryScreen extends ConsumerStatefulWidget {
   const ManageInventoryScreen({super.key});
 
   @override
-  ConsumerState<ManageInventoryScreen> createState() => _ManageInventoryScreenState();
+  ConsumerState<ManageInventoryScreen> createState() =>
+      _ManageInventoryScreenState();
 }
 
 class _ManageInventoryScreenState extends ConsumerState<ManageInventoryScreen> {
@@ -35,7 +36,9 @@ class _ManageInventoryScreenState extends ConsumerState<ManageInventoryScreen> {
   List<Product> _applySearch(List<Product> products) {
     final query = _searchController.text.trim().toLowerCase();
     if (query.isEmpty) return products;
-    return products.where((product) => product.name.toLowerCase().contains(query)).toList();
+    return products
+        .where((product) => product.name.toLowerCase().contains(query))
+        .toList();
   }
 
   Future<void> _adjust(Product product) async {
@@ -50,13 +53,17 @@ class _ManageInventoryScreenState extends ConsumerState<ManageInventoryScreen> {
           keyboardType: const TextInputType.numberWithOptions(signed: true),
           decoration: const InputDecoration(
             labelText: 'Change amount',
-            helperText: 'Positive to add (e.g. 50 received), negative to subtract (e.g. -5 correction).',
+            helperText:
+                'Positive to add (e.g. 50 received), negative to subtract (e.g. -5 correction).',
           ),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
           TextButton(
-            onPressed: () => Navigator.pop(context, int.tryParse(controller.text.trim())),
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () =>
+                Navigator.pop(context, int.tryParse(controller.text.trim())),
             child: const Text('Apply'),
           ),
         ],
@@ -65,15 +72,19 @@ class _ManageInventoryScreenState extends ConsumerState<ManageInventoryScreen> {
     if (delta == null || delta == 0) return;
 
     try {
-      await ref.read(adminCatalogControllerProvider.notifier).adjustStock(product.id, delta);
+      await ref
+          .read(adminCatalogControllerProvider.notifier)
+          .adjustStock(product.id, delta);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Stock ${delta > 0 ? 'increased' : 'decreased'} by ${delta.abs()}.')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text(
+              'Stock ${delta > 0 ? 'increased' : 'decreased'} by ${delta.abs()}.')));
     } catch (error, stackTrace) {
-      AppLogger.error('ManageInventory', 'adjustStock failed', error: error, stackTrace: stackTrace);
+      AppLogger.error('ManageInventory', 'adjustStock failed',
+          error: error, stackTrace: stackTrace);
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Failed: ${UserFacingError.describe(error)}')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text('Failed: ${UserFacingError.describe(error)}')));
     }
   }
 
@@ -100,44 +111,59 @@ class _ManageInventoryScreenState extends ConsumerState<ManageInventoryScreen> {
             Expanded(
               child: catalog.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text(UserFacingError.describe(error))),
+                error: (error, _) =>
+                    Center(child: Text(UserFacingError.describe(error))),
                 data: (snapshot) {
                   final filtered = _applySearch(snapshot.products);
                   if (filtered.isEmpty) {
-                    return const Center(child: Text('No products match this search.'));
+                    return const Center(
+                        child: Text('No products match this search.'));
                   }
-                  return ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final product = filtered[index];
-                      final color = AccentPalette.forLabel(product.name);
-                      final low = product.stockQuantity <= 0;
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: color.withValues(alpha: 0.15),
-                          foregroundColor: color,
-                          child: Text(product.name.isNotEmpty ? product.name[0].toUpperCase() : '?'),
-                        ),
-                        title: Text(product.name),
-                        subtitle: Text(
-                          '${product.stockQuantity} in stock',
-                          style: low ? const TextStyle(color: Colors.red, fontWeight: FontWeight.w600) : null,
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextButton(
-                              onPressed: () => context.push('/admin/inventory/batches', extra: product),
-                              child: const Text('Batches'),
-                            ),
-                            TextButton(
-                              onPressed: () => _adjust(product),
-                              child: const Text('Adjust'),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () => ref
+                        .read(adminCatalogControllerProvider.notifier)
+                        .refresh(),
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final product = filtered[index];
+                        final color = AccentPalette.forLabel(product.name);
+                        final low = product.stockQuantity <= 0;
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: color.withValues(alpha: 0.15),
+                            foregroundColor: color,
+                            child: Text(product.name.isNotEmpty
+                                ? product.name[0].toUpperCase()
+                                : '?'),
+                          ),
+                          title: Text(product.name),
+                          subtitle: Text(
+                            '${product.stockQuantity} in stock',
+                            style: low
+                                ? const TextStyle(
+                                    color: Colors.red,
+                                    fontWeight: FontWeight.w600)
+                                : null,
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              TextButton(
+                                onPressed: () => context.push(
+                                    '/admin/inventory/batches',
+                                    extra: product),
+                                child: const Text('Batches'),
+                              ),
+                              TextButton(
+                                onPressed: () => _adjust(product),
+                                child: const Text('Adjust'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

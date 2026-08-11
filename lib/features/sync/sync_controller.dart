@@ -30,8 +30,6 @@ class SyncAvailability {
 
   final bool remoteHasUpdates;
   final int pendingUploadCount;
-
-  bool get hasSomethingToSync => remoteHasUpdates || pendingUploadCount > 0;
 }
 
 class SyncState {
@@ -125,6 +123,70 @@ class SyncController extends Notifier<SyncState> {
     } catch (error, stackTrace) {
       debugPrint('SyncController.startSync: sync failed error=$error');
       AppLogger.error('SyncController', 'startSync failed', error: error, stackTrace: stackTrace);
+      state = SyncState(availability: state.availability);
+      rethrow;
+    }
+  }
+
+  /// "Get data" half of a sync, run independently of [pushData] — see the
+  /// app-bar download action in `sync_app_bar_actions.dart`. Only clears the
+  /// remote-updates half of [SyncAvailability] on success; a still-pending
+  /// upload count is left exactly as it was.
+  Future<void> pullData() async {
+    if (state.isSyncing) return;
+    debugPrint('SyncController.pullData: starting pull');
+    state = SyncState(
+      availability: state.availability,
+      progress: const SyncProgress(completed: 0, total: 1, label: 'Starting download…'),
+    );
+    try {
+      await ref.read(catalogControllerProvider.notifier).pull(
+        onProgress: (completed, total, label) {
+          state = SyncState(
+            availability: state.availability,
+            progress: SyncProgress(completed: completed, total: total, label: label),
+          );
+        },
+      );
+      debugPrint('SyncController.pullData: pull succeeded');
+      state = SyncState(
+        availability: SyncAvailability(remoteHasUpdates: false, pendingUploadCount: state.availability.pendingUploadCount),
+      );
+    } catch (error, stackTrace) {
+      debugPrint('SyncController.pullData: pull failed error=$error');
+      AppLogger.error('SyncController', 'pullData failed', error: error, stackTrace: stackTrace);
+      state = SyncState(availability: state.availability);
+      rethrow;
+    }
+  }
+
+  /// "Send data" half of a sync, run independently of [pullData] — see the
+  /// app-bar upload action in `sync_app_bar_actions.dart`. Only clears the
+  /// pending-upload half of [SyncAvailability] on success; a known remote
+  /// update is left exactly as it was.
+  Future<void> pushData() async {
+    if (state.isSyncing) return;
+    debugPrint('SyncController.pushData: starting push');
+    state = SyncState(
+      availability: state.availability,
+      progress: const SyncProgress(completed: 0, total: 1, label: 'Starting upload…'),
+    );
+    try {
+      await ref.read(catalogControllerProvider.notifier).push(
+        onProgress: (completed, total, label) {
+          state = SyncState(
+            availability: state.availability,
+            progress: SyncProgress(completed: completed, total: total, label: label),
+          );
+        },
+      );
+      debugPrint('SyncController.pushData: push succeeded');
+      state = SyncState(
+        availability: SyncAvailability(remoteHasUpdates: state.availability.remoteHasUpdates, pendingUploadCount: 0),
+      );
+    } catch (error, stackTrace) {
+      debugPrint('SyncController.pushData: push failed error=$error');
+      AppLogger.error('SyncController', 'pushData failed', error: error, stackTrace: stackTrace);
       state = SyncState(availability: state.availability);
       rethrow;
     }

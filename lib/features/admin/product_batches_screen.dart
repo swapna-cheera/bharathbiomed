@@ -164,36 +164,39 @@ class _ProductBatchesScreenState extends ConsumerState<ProductBatchesScreen> {
               Expanded(
                 child: batches.isEmpty
                     ? const Center(child: Text('No batches tracked yet.'))
-                    : ListView.builder(
-                        itemCount: batches.length,
-                        itemBuilder: (context, index) {
-                          final batch = batches[index];
-                          final expiry = dateFromIso(batch.expiryDate);
-                          final daysLeft = expiry?.difference(DateTime.now()).inDays;
-                          final expired = batch.isExpired;
-                          final expiringSoon = !expired && daysLeft != null && daysLeft <= 30;
-                          final color = expired
-                              ? Theme.of(context).colorScheme.error
-                              : expiringSoon
-                                  ? Colors.orange
-                                  : null;
-                          return ListTile(
-                            leading: Icon(
-                              expired ? Icons.error_outline : Icons.inventory_2_outlined,
-                              color: color,
-                            ),
-                            title: Text('Batch ${batch.batchNumber}'),
-                            subtitle: Text(
-                              'Qty: ${batch.quantity} • Expires: ${formatIsoForDisplay(batch.expiryDate)}'
-                              '${expired ? ' (expired)' : expiringSoon ? ' (expiring soon)' : ''}',
-                              style: color != null ? TextStyle(color: color, fontWeight: FontWeight.w600) : null,
-                            ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.delete_outline),
-                              onPressed: () => _deleteBatch(batch),
-                            ),
-                          );
-                        },
+                    : RefreshIndicator(
+                        onRefresh: () => ref.refresh(productBatchesProvider(widget.product.id).future),
+                        child: ListView.builder(
+                          itemCount: batches.length,
+                          itemBuilder: (context, index) {
+                            final batch = batches[index];
+                            final expiry = dateFromIso(batch.expiryDate);
+                            final daysLeft = expiry?.difference(DateTime.now()).inDays;
+                            final expired = batch.isExpired;
+                            final expiringSoon = !expired && daysLeft != null && daysLeft <= 30;
+                            final color = expired
+                                ? Theme.of(context).colorScheme.error
+                                : expiringSoon
+                                    ? Colors.orange
+                                    : null;
+                            return ListTile(
+                              leading: Icon(
+                                expired ? Icons.error_outline : Icons.inventory_2_outlined,
+                                color: color,
+                              ),
+                              title: Text('Batch ${batch.batchNumber}'),
+                              subtitle: Text(
+                                'Qty: ${batch.quantity} • Expires: ${formatIsoForDisplay(batch.expiryDate)}'
+                                '${expired ? ' (expired)' : expiringSoon ? ' (expiring soon)' : ''}',
+                                style: color != null ? TextStyle(color: color, fontWeight: FontWeight.w600) : null,
+                              ),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.delete_outline),
+                                onPressed: () => _deleteBatch(batch),
+                              ),
+                            );
+                          },
+                        ),
                       ),
               ),
             ],

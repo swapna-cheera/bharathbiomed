@@ -4,7 +4,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../core/error/user_facing_error.dart';
 import '../../core/theme/accent_palette.dart';
+import '../../core/widgets/dashboard_tile.dart';
+import '../../core/widgets/section_header.dart';
+import '../../core/widgets/stat_tile.dart';
 import '../auth/auth_controller.dart';
+import '../sync/sync_app_bar_actions.dart';
 import 'admin_catalog_controller.dart';
 import 'admin_notifications_controller.dart';
 import 'employee_controller.dart';
@@ -12,8 +16,27 @@ import 'employee_controller.dart';
 /// Entry point for the admin section: departments (tap to manage that
 /// department's products) plus links to department/designation/employee
 /// management and adding a new product.
-class AdminHomeScreen extends ConsumerWidget {
+class AdminHomeScreen extends ConsumerStatefulWidget {
   const AdminHomeScreen({super.key});
+
+  @override
+  ConsumerState<AdminHomeScreen> createState() => _AdminHomeScreenState();
+}
+
+class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() => setState(() {}));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
     debugPrint('AdminHomeScreen._logout: logout requested');
@@ -37,16 +60,70 @@ class AdminHomeScreen extends ConsumerWidget {
     context.go('/login');
   }
 
+  /// Every quick-action tile, grouped by section. Filtered against the
+  /// search field below so the ~17 tiles here (more once Financial/Other
+  /// grow further) stay scannable instead of relying purely on eyeballing
+  /// the grid — a whole section disappears once none of its tiles match.
+  List<MapEntry<String, List<DashboardTile>>> _sections(BuildContext context) {
+    return [
+      MapEntry('Catalog & People', [
+        DashboardTile(icon: Icons.storefront_outlined, label: 'View Catalog', onTap: () => context.push('/catalog')),
+        DashboardTile(
+            icon: Icons.apartment, label: 'Departments', onTap: () => context.push('/admin/departments')),
+        DashboardTile(
+            icon: Icons.badge_outlined, label: 'Designations', onTap: () => context.push('/admin/designations')),
+        DashboardTile(
+            icon: Icons.people_outline, label: 'Employees', onTap: () => context.push('/admin/employees')),
+        DashboardTile(
+            icon: Icons.local_hospital_outlined, label: 'Doctors', onTap: () => context.push('/admin/doctors')),
+        DashboardTile(icon: Icons.add_business_outlined, label: 'Agencies', onTap: () => context.push('/agencies')),
+        DashboardTile(
+            icon: Icons.local_pharmacy_outlined, label: 'Pharmacies', onTap: () => context.push('/pharmacies')),
+        DashboardTile(
+            icon: Icons.pending_actions_outlined,
+            label: 'Partner Requests',
+            onTap: () => context.push('/entity-requests')),
+      ]),
+      MapEntry('Field Operations', [
+        DashboardTile(
+            icon: Icons.assignment_outlined, label: 'Visit Logs', onTap: () => context.push('/team/visit-logs')),
+        DashboardTile(
+            icon: Icons.checklist_outlined, label: 'RCPA Entries', onTap: () => context.push('/team/rcpa')),
+        DashboardTile(
+            icon: Icons.bar_chart, label: 'Usage Dashboard', onTap: () => context.push('/admin/dashboard')),
+      ]),
+      MapEntry('Financial', [
+        DashboardTile(
+            icon: Icons.inventory_2_outlined, label: 'Inventory', onTap: () => context.push('/admin/inventory')),
+        DashboardTile(
+            icon: Icons.warning_amber_outlined,
+            label: 'Expiry Alerts',
+            onTap: () => context.push('/admin/inventory/expiry-alerts')),
+        DashboardTile(
+            icon: Icons.receipt_long_outlined, label: 'Order Workflow', onTap: () => context.push('/team/orders')),
+        DashboardTile(
+            icon: Icons.track_changes_outlined, label: 'Team Targets', onTap: () => context.push('/team/targets')),
+      ]),
+      MapEntry('Other', [
+        DashboardTile(icon: Icons.add_alert_outlined, label: 'Reminders', onTap: () => context.push('/reminders')),
+        DashboardTile(
+            icon: Icons.person_outline, label: 'Profile', onTap: () => context.push('/account/profile')),
+      ]),
+    ];
+  }
+
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final catalog = ref.watch(adminCatalogControllerProvider);
     final employees = ref.watch(employeeControllerProvider);
     final unreadNotifications = ref.watch(unreadAdminNotificationsCountProvider);
+    final query = _searchController.text.trim().toLowerCase();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Admin'),
         actions: [
+          const SyncAppBarActions(),
           IconButton(
             icon: Badge(
               label: Text('$unreadNotifications'),
@@ -55,91 +132,6 @@ class AdminHomeScreen extends ConsumerWidget {
             ),
             tooltip: 'Notifications',
             onPressed: () => context.push('/admin/notifications'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            tooltip: 'Profile',
-            onPressed: () => context.push('/account/profile'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.storefront_outlined),
-            tooltip: 'View Catalog (MR view)',
-            onPressed: () => context.push('/catalog'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.apartment),
-            tooltip: 'Manage Departments',
-            onPressed: () => context.push('/admin/departments'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.badge_outlined),
-            tooltip: 'Manage Designations',
-            onPressed: () => context.push('/admin/designations'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.people_outline),
-            tooltip: 'Manage Employees',
-            onPressed: () => context.push('/admin/employees'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.local_hospital_outlined),
-            tooltip: 'Manage Doctors',
-            onPressed: () => context.push('/admin/doctors'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_alert_outlined),
-            tooltip: 'Reminders',
-            onPressed: () => context.push('/reminders'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.bar_chart),
-            tooltip: 'Usage Dashboard',
-            onPressed: () => context.push('/admin/dashboard'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.assignment_outlined),
-            tooltip: 'Visit Logs',
-            onPressed: () => context.push('/team/visit-logs'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.add_business_outlined),
-            tooltip: 'Agencies',
-            onPressed: () => context.push('/agencies'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.local_pharmacy_outlined),
-            tooltip: 'Pharmacies',
-            onPressed: () => context.push('/pharmacies'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.fact_check_outlined),
-            tooltip: 'Agency / Pharmacy Requests',
-            onPressed: () => context.push('/entity-requests'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.receipt_long_outlined),
-            tooltip: 'Order Workflow',
-            onPressed: () => context.push('/team/orders'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.track_changes_outlined),
-            tooltip: 'Team Targets',
-            onPressed: () => context.push('/team/targets'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.fact_check_outlined),
-            tooltip: 'RCPA Entries',
-            onPressed: () => context.push('/team/rcpa'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.inventory_2_outlined),
-            tooltip: 'Manage Inventory',
-            onPressed: () => context.push('/admin/inventory'),
-          ),
-          IconButton(
-            icon: const Icon(Icons.warning_amber_outlined),
-            tooltip: 'Expiry Alerts',
-            onPressed: () => context.push('/admin/inventory/expiry-alerts'),
           ),
           IconButton(
             icon: const Icon(Icons.logout),
@@ -167,60 +159,124 @@ class AdminHomeScreen extends ConsumerWidget {
           ),
         ),
         data: (snapshot) {
-          if (snapshot.departments.isEmpty) {
-            return const Center(
-              child: Text('No departments yet.\nTap the apartment icon above to add one.', textAlign: TextAlign.center),
-            );
-          }
+          final allSections = _sections(context);
+          final filteredSections = query.isEmpty
+              ? allSections
+              : allSections
+                  .map((section) => MapEntry(
+                        section.key,
+                        section.value.where((tile) => tile.label.toLowerCase().contains(query)).toList(),
+                      ))
+                  .where((section) => section.value.isNotEmpty)
+                  .toList();
+          final departmentCount = query.isEmpty ? snapshot.departments.length : 0;
+
           return RefreshIndicator(
             onRefresh: () {
               debugPrint('AdminHomeScreen: pull-to-refresh triggered');
               return ref.read(adminCatalogControllerProvider.notifier).refresh();
             },
             child: ListView.builder(
-              itemCount: snapshot.departments.length + 1,
+              itemCount: departmentCount == 0 ? 3 : departmentCount + 3,
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return Padding(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                    child: Row(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Expanded(
-                          child: _StatCard(
-                            icon: Icons.apartment,
-                            color: const Color(0xFF3470B2),
-                            label: 'Departments',
-                            value: snapshot.departments.length.toString(),
-                            onTap: () => context.push('/admin/departments'),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            icon: Icons.inventory_2_outlined,
-                            color: const Color(0xFF2E7D32),
-                            label: 'Products',
-                            value: snapshot.products.length.toString(),
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: _StatCard(
-                            icon: Icons.people_outline,
-                            color: const Color(0xFFEF6C00),
-                            label: 'Users',
-                            value: employees.maybeWhen(
-                              data: (list) => list.length.toString(),
-                              orElse: () => '–',
+                        Row(
+                          children: [
+                            Expanded(
+                              child: StatTile(
+                                icon: Icons.apartment,
+                                color: const Color(0xFF3470B2),
+                                label: 'Departments',
+                                value: snapshot.departments.length.toString(),
+                                onTap: () => context.push('/admin/departments'),
+                              ),
                             ),
-                            onTap: () => context.push('/admin/employees'),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: StatTile(
+                                icon: Icons.inventory_2_outlined,
+                                color: const Color(0xFF2E7D32),
+                                label: 'Products',
+                                value: snapshot.products.length.toString(),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: StatTile(
+                                icon: Icons.people_outline,
+                                color: const Color(0xFFEF6C00),
+                                label: 'Users',
+                                value: employees.maybeWhen(
+                                  data: (list) => list.length.toString(),
+                                  orElse: () => '–',
+                                ),
+                                onTap: () => context.push('/admin/employees'),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search admin actions…',
+                            prefixIcon: const Icon(Icons.search),
+                            suffixIcon: query.isEmpty
+                                ? null
+                                : IconButton(
+                                    icon: const Icon(Icons.clear),
+                                    onPressed: () => _searchController.clear(),
+                                  ),
+                            isDense: true,
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                           ),
                         ),
                       ],
                     ),
                   );
                 }
-                final department = snapshot.departments[index - 1];
+                if (index == 1) {
+                  if (filteredSections.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                      child: Text('No admin actions match your search.', textAlign: TextAlign.center),
+                    );
+                  }
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      for (final section in filteredSections) ...[
+                        SectionHeader(title: section.key),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: DashboardGrid(children: section.value),
+                        ),
+                      ],
+                    ],
+                  );
+                }
+                if (index == 2) {
+                  if (departmentCount == 0) return const SizedBox.shrink();
+                  return Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                    child: Text('Departments', style: Theme.of(context).textTheme.titleSmall),
+                  );
+                }
+                if (snapshot.departments.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                    child: Text(
+                      'No departments yet.\nUse Departments in the grid above to add one.',
+                      textAlign: TextAlign.center,
+                    ),
+                  );
+                }
+                final department = snapshot.departments[index - 3];
                 final count = snapshot.products.where((p) => p.departments.containsKey(department)).length;
                 final color = AccentPalette.forLabel(department);
                 return ListTile(
@@ -243,44 +299,6 @@ class AdminHomeScreen extends ConsumerWidget {
         onPressed: () => context.push('/admin/products/add'),
         icon: const Icon(Icons.add),
         label: const Text('Add Product'),
-      ),
-    );
-  }
-}
-
-class _StatCard extends StatelessWidget {
-  const _StatCard({required this.icon, required this.color, required this.label, required this.value, this.onTap});
-
-  final IconData icon;
-  final Color color;
-  final String label;
-  final String value;
-  final VoidCallback? onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: color.withValues(alpha: 0.12),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Row(
-            children: [
-              Icon(icon, color: color),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(value, style: Theme.of(context).textTheme.titleLarge?.copyWith(color: color)),
-                  Text(label, style: Theme.of(context).textTheme.bodySmall),
-                ],
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

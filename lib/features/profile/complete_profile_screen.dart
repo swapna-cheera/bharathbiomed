@@ -80,7 +80,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
       // The router's redirect re-evaluates once myEmployeeProfileProvider's
       // stream picks up profileCompleted=true, but navigate immediately too
       // rather than waiting on that round trip through Firestore.
-      context.go('/catalog');
+      context.go('/home');
     } catch (error, stackTrace) {
       debugPrint('CompleteProfileScreen._save: failed error=$error');
       AppLogger.error('CompleteProfile', 'updateMyProfile failed', error: error, stackTrace: stackTrace);

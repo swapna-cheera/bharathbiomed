@@ -9,6 +9,7 @@ import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/utils/validators.dart';
+import '../admin/admin_access.dart';
 import '../sync/sync_controller.dart';
 import 'auth_controller.dart';
 
@@ -26,6 +27,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -84,7 +86,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       );
     }
     if (!mounted) return;
-    context.go('/catalog');
+    context.go(ref.read(isAdminProvider) ? '/admin' : '/home');
   }
 
   /// Only works for a real email — Firebase can only send a reset link to an

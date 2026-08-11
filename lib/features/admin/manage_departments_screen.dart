@@ -11,10 +11,12 @@ class ManageDepartmentsScreen extends ConsumerStatefulWidget {
   const ManageDepartmentsScreen({super.key});
 
   @override
-  ConsumerState<ManageDepartmentsScreen> createState() => _ManageDepartmentsScreenState();
+  ConsumerState<ManageDepartmentsScreen> createState() =>
+      _ManageDepartmentsScreenState();
 }
 
-class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScreen> {
+class _ManageDepartmentsScreenState
+    extends ConsumerState<ManageDepartmentsScreen> {
   final _nameController = TextEditingController();
   final _searchController = TextEditingController();
   bool _adding = false;
@@ -33,16 +35,25 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
     return items.where((name) => name.toLowerCase().contains(query)).toList();
   }
 
-  Future<void> _runGuarded(Future<void> Function() action, {required String failureTitle}) async {
-    debugPrint('ManageDepartmentsScreen._runGuarded: running action "$failureTitle"');
+  Future<void> _runGuarded(Future<void> Function() action,
+      {required String failureTitle}) async {
+    debugPrint(
+        'ManageDepartmentsScreen._runGuarded: running action "$failureTitle"');
     try {
       await action();
-      debugPrint('ManageDepartmentsScreen._runGuarded: action succeeded "$failureTitle"');
+      debugPrint(
+          'ManageDepartmentsScreen._runGuarded: action succeeded "$failureTitle"');
     } catch (error, stackTrace) {
-      debugPrint('ManageDepartmentsScreen._runGuarded: action failed "$failureTitle" error=$error');
-      AppLogger.error('ManageDepartments', failureTitle, error: error, stackTrace: stackTrace);
+      debugPrint(
+          'ManageDepartmentsScreen._runGuarded: action failed "$failureTitle" error=$error');
+      AppLogger.error('ManageDepartments', failureTitle,
+          error: error, stackTrace: stackTrace);
       if (!mounted) return;
-      QuickAlert.show(context: context, type: QuickAlertType.error, title: failureTitle, text: UserFacingError.describe(error));
+      QuickAlert.show(
+          context: context,
+          type: QuickAlertType.error,
+          title: failureTitle,
+          text: UserFacingError.describe(error));
     }
   }
 
@@ -53,7 +64,8 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
 
     setState(() => _adding = true);
     await _runGuarded(
-      () => ref.read(adminCatalogControllerProvider.notifier).addDepartment(name),
+      () =>
+          ref.read(adminCatalogControllerProvider.notifier).addDepartment(name),
       failureTitle: 'Failed to add department',
     );
     if (mounted) {
@@ -63,7 +75,8 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
   }
 
   Future<void> _rename(String oldName) async {
-    debugPrint('ManageDepartmentsScreen._rename: rename requested oldName=$oldName');
+    debugPrint(
+        'ManageDepartmentsScreen._rename: rename requested oldName=$oldName');
     final controller = TextEditingController(text: oldName);
     final newName = await showDialog<String>(
       context: context,
@@ -71,15 +84,21 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
         title: const Text('Rename department'),
         content: TextField(controller: controller, autofocus: true),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, controller.text.trim()), child: const Text('Save')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, controller.text.trim()),
+              child: const Text('Save')),
         ],
       ),
     );
     if (newName == null || newName.isEmpty || newName == oldName) return;
 
     await _runGuarded(
-      () => ref.read(adminCatalogControllerProvider.notifier).renameDepartment(oldName, newName),
+      () => ref
+          .read(adminCatalogControllerProvider.notifier)
+          .renameDepartment(oldName, newName),
       failureTitle: 'Failed to rename department',
     );
   }
@@ -90,17 +109,24 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete department?'),
-        content: Text('"$name" will be removed from every product that has it.'),
+        content:
+            Text('"$name" will be removed from every product that has it.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Delete')),
         ],
       ),
     );
     if (confirmed != true) return;
 
     await _runGuarded(
-      () => ref.read(adminCatalogControllerProvider.notifier).deleteDepartment(name),
+      () => ref
+          .read(adminCatalogControllerProvider.notifier)
+          .deleteDepartment(name),
       failureTitle: 'Failed to delete department',
     );
   }
@@ -120,14 +146,18 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
                 Expanded(
                   child: TextField(
                     controller: _nameController,
-                    decoration: const InputDecoration(labelText: 'New department name'),
+                    decoration:
+                        const InputDecoration(labelText: 'New department name'),
                   ),
                 ),
                 const SizedBox(width: 8),
                 ElevatedButton(
                   onPressed: _adding ? null : _add,
                   child: _adding
-                      ? const SizedBox(height: 16, width: 16, child: CircularProgressIndicator(strokeWidth: 2))
+                      ? const SizedBox(
+                          height: 16,
+                          width: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2))
                       : const Text('Add'),
                 ),
               ],
@@ -146,36 +176,48 @@ class _ManageDepartmentsScreenState extends ConsumerState<ManageDepartmentsScree
             Expanded(
               child: catalog.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
-                error: (error, _) => Center(child: Text(UserFacingError.describe(error))),
+                error: (error, _) =>
+                    Center(child: Text(UserFacingError.describe(error))),
                 data: (snapshot) {
                   final filtered = _applySearch(snapshot.departments);
                   if (filtered.isEmpty) {
-                    return const Center(child: Text('No departments match this search.'));
+                    return const Center(
+                        child: Text('No departments match this search.'));
                   }
-                  return ListView.builder(
-                    itemCount: filtered.length,
-                    itemBuilder: (context, index) {
-                      final department = filtered[index];
-                      final color = AccentPalette.forLabel(department);
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: color.withValues(alpha: 0.15),
-                          foregroundColor: color,
-                          child: Text(department.isNotEmpty ? department[0].toUpperCase() : '?'),
-                        ),
-                        title: Text(department),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(icon: const Icon(Icons.edit), onPressed: () => _rename(department)),
-                            IconButton(
-                              icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                              onPressed: () => _delete(department),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: () => ref
+                        .read(adminCatalogControllerProvider.notifier)
+                        .refresh(),
+                    child: ListView.builder(
+                      itemCount: filtered.length,
+                      itemBuilder: (context, index) {
+                        final department = filtered[index];
+                        final color = AccentPalette.forLabel(department);
+                        return ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: color.withValues(alpha: 0.15),
+                            foregroundColor: color,
+                            child: Text(department.isNotEmpty
+                                ? department[0].toUpperCase()
+                                : '?'),
+                          ),
+                          title: Text(department),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () => _rename(department)),
+                              IconButton(
+                                icon: Icon(Icons.delete,
+                                    color: Theme.of(context).colorScheme.error),
+                                onPressed: () => _delete(department),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),

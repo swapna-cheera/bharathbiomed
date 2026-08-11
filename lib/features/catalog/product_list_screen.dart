@@ -7,13 +7,12 @@ import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
 import '../../core/tenant/tenant_config.dart';
 import '../../core/theme/app_theme.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../domain/models/employee.dart';
 import '../admin/admin_access.dart';
-import '../auth/auth_controller.dart';
 import '../profile/birthday_celebration.dart';
 import '../profile/profile_controller.dart';
 import '../sync/sync_controller.dart';
-import '../team/team_access.dart';
 import 'catalog_controller.dart';
 import 'selection_controller.dart';
 import 'widgets/category_section.dart';
@@ -60,28 +59,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
     ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(resultMessage)));
   }
 
-  Future<void> _logout() async {
-    debugPrint('ProductListScreen._logout: logout requested');
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text('You can keep browsing the catalog offline after logging out — sync just needs signing in again.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
-        ],
-      ),
-    );
-    if (confirmed != true || !mounted) return;
-
-    debugPrint('ProductListScreen._logout: calling authController.signOut');
-    await ref.read(authControllerProvider.notifier).signOut();
-    debugPrint('ProductListScreen._logout: signOut succeeded');
-    if (!mounted) return;
-    context.go('/login');
-  }
-
   void _openSlideshowForSelection() {
     debugPrint('ProductListScreen._openSlideshowForSelection: play button pressed');
     final selectedProducts = ref.read(selectionControllerProvider);
@@ -101,7 +78,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
   Widget build(BuildContext context) {
     final catalog = ref.watch(catalogControllerProvider);
     final isAdmin = ref.watch(isAdminProvider);
-    final isSignedIn = ref.watch(authControllerProvider).value != null;
     final isSyncing = ref.watch(syncControllerProvider).isSyncing;
     final Employee? myProfile = isAdmin ? null : ref.watch(myEmployeeProfileProvider).value;
 
@@ -128,116 +104,6 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
               icon: const Icon(Icons.admin_panel_settings_outlined),
               tooltip: 'Admin',
               onPressed: () => context.push('/admin'),
-            ),
-          // An Office Admin (not the hardcoded admin) only gets Inventory —
-          // see app_router.dart's redirect for the '/admin/inventory'
-          // sub-routes it actually normalizes this push to (bare '/admin' on
-          // web, straight to inventory on mobile).
-          if (!isAdmin && isSignedIn && ref.watch(isOfficeAdminProvider))
-            IconButton(
-              icon: const Icon(Icons.inventory_2_outlined),
-              tooltip: 'Inventory',
-              onPressed: () => context.push('/admin/inventory'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.today_outlined),
-              tooltip: "Today's Visits",
-              onPressed: () => context.push('/doctors/today'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.local_hospital_outlined),
-              tooltip: 'My Doctors',
-              onPressed: () => context.push('/doctors'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.calendar_month_outlined),
-              tooltip: 'Weekly Visit Plan',
-              onPressed: () => context.push('/doctors/plan'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.add_alert_outlined),
-              tooltip: 'Reminders',
-              onPressed: () => context.push('/reminders'),
-            ),
-          if (isSignedIn)
-            IconButton(
-              icon: const Icon(Icons.add_business_outlined),
-              tooltip: 'Agencies',
-              onPressed: () => context.push('/agencies'),
-            ),
-          if (isSignedIn)
-            IconButton(
-              icon: const Icon(Icons.local_pharmacy_outlined),
-              tooltip: 'Pharmacies',
-              onPressed: () => context.push('/pharmacies'),
-            ),
-          if (isSignedIn && ref.watch(isOfficeAdminProvider))
-            IconButton(
-              icon: const Icon(Icons.fact_check_outlined),
-              tooltip: 'Agency / Pharmacy Requests',
-              onPressed: () => context.push('/entity-requests'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.add_shopping_cart),
-              tooltip: 'My Orders',
-              onPressed: () => context.push('/orders'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.track_changes_outlined),
-              tooltip: 'My Target',
-              onPressed: () => context.push('/targets'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.fact_check_outlined),
-              tooltip: 'RCPA Entries',
-              onPressed: () => context.push('/rcpa'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.request_page_outlined),
-              tooltip: 'My Expense Claims',
-              onPressed: () => context.push('/expenses'),
-            ),
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.gavel_outlined),
-              tooltip: 'Compliance Log',
-              onPressed: () => context.push('/compliance'),
-            ),
-          // Shown to every non-admin signed-in employee, not just designated
-          // managers — there's no cheap client-side way to know in advance
-          // whether someone has reports, and the screens behind this just
-          // show an empty state if they don't (see resolveVisibleEmployees).
-          if (isSignedIn && !isAdmin)
-            IconButton(
-              icon: const Icon(Icons.groups_outlined),
-              tooltip: 'My Team',
-              onPressed: () => context.push('/team'),
-            ),
-          if (isSignedIn)
-            IconButton(
-              icon: const Icon(Icons.person_outline),
-              tooltip: 'Profile',
-              onPressed: () => context.push('/account/profile'),
-            ),
-          if (isSignedIn)
-            IconButton(
-              icon: const Icon(Icons.lock_outline),
-              tooltip: 'Change Password',
-              onPressed: () => context.push('/account/change-password'),
-            ),
-          if (isSignedIn)
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: 'Log out',
-              onPressed: _logout,
             ),
           IconButton(
             icon: isSyncing
@@ -278,10 +144,16 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
           ),
           data: (snapshot) {
             if (snapshot.departments.isEmpty) {
-              return const Center(
-                child: Text(
-                  'No data synced yet.\nSign in and sync, or tap the sync button above, to download the catalog.',
-                  textAlign: TextAlign.center,
+              return RefreshIndicator(
+                onRefresh: _syncCatalog,
+                child: ListView(
+                  children: const [
+                    SizedBox(height: 80),
+                    EmptyState(
+                      icon: Icons.storefront_outlined,
+                      message: 'No data synced yet.\nSign in and sync, or tap the sync button above, to download the catalog.',
+                    ),
+                  ],
                 ),
               );
             }
@@ -314,15 +186,23 @@ class _ProductListScreenState extends ConsumerState<ProductListScreen> {
                   ),
                 ),
                 Expanded(
-                  child: departmentsWithProducts.isEmpty
-                      ? const Center(child: Text('No products match this search.'))
-                      : ListView.builder(
-                          itemCount: departmentsWithProducts.length,
-                          itemBuilder: (context, index) {
-                            final entry = departmentsWithProducts[index];
-                            return CategorySection(category: entry.department, products: entry.products);
-                          },
-                        ),
+                  child: RefreshIndicator(
+                    onRefresh: _syncCatalog,
+                    child: departmentsWithProducts.isEmpty
+                        ? ListView(
+                            children: const [
+                              SizedBox(height: 80),
+                              EmptyState(icon: Icons.search_off, message: 'No products match this search.'),
+                            ],
+                          )
+                        : ListView.builder(
+                            itemCount: departmentsWithProducts.length,
+                            itemBuilder: (context, index) {
+                              final entry = departmentsWithProducts[index];
+                              return CategorySection(category: entry.department, products: entry.products);
+                            },
+                          ),
+                  ),
                 ),
               ],
             );

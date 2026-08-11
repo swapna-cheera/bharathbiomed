@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
 import '../../core/theme/accent_palette.dart';
+import '../../core/widgets/app_list_card.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../data/providers.dart';
 import '../../domain/models/agency.dart';
 import '../team/team_access.dart';
@@ -111,39 +113,56 @@ class _AgenciesScreenState extends ConsumerState<AgenciesScreen> {
               error: (error, _) => Center(child: Text('Failed to load agencies: ${UserFacingError.describe(error)}')),
               data: (agencies) {
                 if (agencies.isEmpty) {
-                  return const Center(
-                    child: Text('No agencies yet.\nTap "Add Agency" below to propose one.', textAlign: TextAlign.center),
+                  return RefreshIndicator(
+                    onRefresh: _sync,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        EmptyState(icon: Icons.add_business_outlined, message: 'No agencies yet.\nTap "Add Agency" below to propose one.'),
+                      ],
+                    ),
                   );
                 }
                 final filtered = _applyFilter(agencies);
                 if (filtered.isEmpty) {
-                  return const Center(child: Text('No agencies match this search.'));
+                  return RefreshIndicator(
+                    onRefresh: _sync,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        EmptyState(icon: Icons.search_off, message: 'No agencies match this search.'),
+                      ],
+                    ),
+                  );
                 }
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final agency = filtered[index];
-                    return ListTile(
-                      onTap: canManage ? () => context.push('/agencies/edit', extra: agency) : null,
-                      leading: CircleAvatar(
-                        backgroundColor: AccentPalette.forLabel(agency.name).withValues(alpha: 0.15),
-                        foregroundColor: AccentPalette.forLabel(agency.name),
-                        child: Text(agency.name.isNotEmpty ? agency.name[0].toUpperCase() : '?'),
-                      ),
-                      title: Text(agency.name, style: TextStyle(color: agency.active ? null : Colors.grey)),
-                      subtitle: Text(
-                        '${agency.contactPerson}${agency.phone.isEmpty ? '' : ' • ${agency.phone}'}'
-                        '${agency.active ? '' : ' • Inactive'}',
-                      ),
-                      trailing: isOfficeAdmin
-                          ? IconButton(
-                              icon: Icon(agency.active ? Icons.block : Icons.check_circle_outline),
-                              tooltip: agency.active ? 'Deactivate' : 'Reactivate',
-                              onPressed: () => _setActive(agency, active: !agency.active),
-                            )
-                          : (canManage ? const Icon(Icons.arrow_forward_ios, size: 16) : null),
-                    );
-                  },
+                return RefreshIndicator(
+                  onRefresh: _sync,
+                  child: ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final agency = filtered[index];
+                      return AppListCard(
+                        onTap: canManage ? () => context.push('/agencies/edit', extra: agency) : null,
+                        leading: CircleAvatar(
+                          backgroundColor: AccentPalette.forLabel(agency.name).withValues(alpha: 0.15),
+                          foregroundColor: AccentPalette.forLabel(agency.name),
+                          child: Text(agency.name.isNotEmpty ? agency.name[0].toUpperCase() : '?'),
+                        ),
+                        title: Text(agency.name, style: TextStyle(color: agency.active ? null : Colors.grey)),
+                        subtitle: Text(
+                          '${agency.contactPerson}${agency.phone.isEmpty ? '' : ' • ${agency.phone}'}'
+                          '${agency.active ? '' : ' • Inactive'}',
+                        ),
+                        trailing: isOfficeAdmin
+                            ? IconButton(
+                                icon: Icon(agency.active ? Icons.block : Icons.check_circle_outline),
+                                tooltip: agency.active ? 'Deactivate' : 'Reactivate',
+                                onPressed: () => _setActive(agency, active: !agency.active),
+                              )
+                            : (canManage ? const Icon(Icons.arrow_forward_ios, size: 16) : null),
+                      );
+                    },
+                  ),
                 );
               },
             ),

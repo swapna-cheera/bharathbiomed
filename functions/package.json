@@ -10,6 +10,7 @@
     "migrate:designations": "tsc scripts/migrateDesignations.ts --outDir scripts/lib --module commonjs --target es2019 --esModuleInterop --skipLibCheck && node scripts/lib/migrateDesignations.js",
     "clone:catalog": "tsc scripts/cloneProductsCatalog.ts --outDir scripts/lib --module commonjs --target es2019 --esModuleInterop --skipLibCheck && node scripts/lib/cloneProductsCatalog.js",
     "test:seed": "tsc scripts/seedTestData.ts --outDir scripts/lib --module commonjs --target es2019 --esModuleInterop --skipLibCheck && node scripts/lib/seedTestData.js",
+    "create:reviewer": "tsc scripts/createReviewerAccount.ts --outDir scripts/lib --module commonjs --target es2019 --esModuleInterop --skipLibCheck && node scripts/lib/createReviewerAccount.js",
     "test:cleanup": "tsc scripts/cleanupTestData.ts --outDir scripts/lib --module commonjs --target es2019 --esModuleInterop --skipLibCheck && node scripts/lib/cleanupTestData.js",
     "wipe:all": "tsc scripts/wipeExceptCatalog.ts --outDir scripts/lib --module commonjs --target es2019 --esModuleInterop --skipLibCheck && node scripts/lib/wipeExceptCatalog.js",
     "test": "bash scripts/test-with-emulator.sh",

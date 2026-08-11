@@ -20,7 +20,8 @@ class ManageEmployeesScreen extends ConsumerStatefulWidget {
   const ManageEmployeesScreen({super.key});
 
   @override
-  ConsumerState<ManageEmployeesScreen> createState() => _ManageEmployeesScreenState();
+  ConsumerState<ManageEmployeesScreen> createState() =>
+      _ManageEmployeesScreenState();
 }
 
 class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
@@ -56,16 +57,23 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
     }).toList();
   }
 
-  Future<void> _delete(BuildContext context, WidgetRef ref, Employee employee) async {
-    debugPrint('ManageEmployeesScreen._delete: delete requested uid=${employee.uid}');
+  Future<void> _delete(
+      BuildContext context, WidgetRef ref, Employee employee) async {
+    debugPrint(
+        'ManageEmployeesScreen._delete: delete requested uid=${employee.uid}');
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Remove employee?'),
-        content: Text('${employee.displayName} (${employee.username}) will no longer be able to log in.'),
+        content: Text(
+            '${employee.displayName} (${employee.username}) will no longer be able to log in.'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Remove')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text('Remove')),
         ],
       ),
     );
@@ -73,12 +81,18 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
 
     setState(() => _busyUids.add(employee.uid));
     try {
-      debugPrint('ManageEmployeesScreen._delete: calling deleteEmployee uid=${employee.uid}');
-      await ref.read(employeeControllerProvider.notifier).deleteEmployee(employee.uid);
-      debugPrint('ManageEmployeesScreen._delete: deleteEmployee succeeded uid=${employee.uid}');
+      debugPrint(
+          'ManageEmployeesScreen._delete: calling deleteEmployee uid=${employee.uid}');
+      await ref
+          .read(employeeControllerProvider.notifier)
+          .deleteEmployee(employee.uid);
+      debugPrint(
+          'ManageEmployeesScreen._delete: deleteEmployee succeeded uid=${employee.uid}');
     } catch (error, stackTrace) {
-      debugPrint('ManageEmployeesScreen._delete: deleteEmployee failed error=$error');
-      AppLogger.error('ManageEmployees', 'deleteEmployee failed', error: error, stackTrace: stackTrace);
+      debugPrint(
+          'ManageEmployeesScreen._delete: deleteEmployee failed error=$error');
+      AppLogger.error('ManageEmployees', 'deleteEmployee failed',
+          error: error, stackTrace: stackTrace);
       if (!context.mounted) return;
       QuickAlert.show(
         context: context,
@@ -91,8 +105,10 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
     }
   }
 
-  Future<void> _resetPassword(BuildContext context, WidgetRef ref, Employee employee) async {
-    debugPrint('ManageEmployeesScreen._resetPassword: reset password requested uid=${employee.uid}');
+  Future<void> _resetPassword(
+      BuildContext context, WidgetRef ref, Employee employee) async {
+    debugPrint(
+        'ManageEmployeesScreen._resetPassword: reset password requested uid=${employee.uid}');
     final controller = TextEditingController(text: _defaultResetPassword);
     final newPassword = await showDialog<String>(
       context: context,
@@ -104,18 +120,30 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
           decoration: const InputDecoration(labelText: 'New password'),
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, controller.text), child: const Text('Reset')),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, controller.text),
+              child: const Text('Reset')),
         ],
       ),
     );
-    if (newPassword == null || newPassword.length < 6 || _busyUids.contains(employee.uid)) return;
+    if (newPassword == null ||
+        newPassword.length < 6 ||
+        _busyUids.contains(employee.uid)) {
+      return;
+    }
 
     setState(() => _busyUids.add(employee.uid));
     try {
-      debugPrint('ManageEmployeesScreen._resetPassword: calling resetPassword uid=${employee.uid}');
-      await ref.read(employeeControllerProvider.notifier).resetPassword(employee.uid, newPassword);
-      debugPrint('ManageEmployeesScreen._resetPassword: resetPassword succeeded uid=${employee.uid}');
+      debugPrint(
+          'ManageEmployeesScreen._resetPassword: calling resetPassword uid=${employee.uid}');
+      await ref
+          .read(employeeControllerProvider.notifier)
+          .resetPassword(employee.uid, newPassword);
+      debugPrint(
+          'ManageEmployeesScreen._resetPassword: resetPassword succeeded uid=${employee.uid}');
       if (!context.mounted) return;
       final message = buildCredentialsMessage(
         name: employee.firstName,
@@ -130,8 +158,10 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
         mobileNumber: employee.mobileNumber,
       );
     } catch (error, stackTrace) {
-      debugPrint('ManageEmployeesScreen._resetPassword: resetPassword failed error=$error');
-      AppLogger.error('ManageEmployees', 'resetPassword failed', error: error, stackTrace: stackTrace);
+      debugPrint(
+          'ManageEmployeesScreen._resetPassword: resetPassword failed error=$error');
+      AppLogger.error('ManageEmployees', 'resetPassword failed',
+          error: error, stackTrace: stackTrace);
       if (!context.mounted) return;
       QuickAlert.show(
         context: context,
@@ -163,8 +193,10 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
     );
   }
 
-  Future<void> _setStatus(BuildContext context, WidgetRef ref, Employee employee, bool disabled) async {
-    debugPrint('ManageEmployeesScreen._setStatus: status change requested uid=${employee.uid} disabled=$disabled');
+  Future<void> _setStatus(BuildContext context, WidgetRef ref,
+      Employee employee, bool disabled) async {
+    debugPrint(
+        'ManageEmployeesScreen._setStatus: status change requested uid=${employee.uid} disabled=$disabled');
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -176,8 +208,12 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
               : '${employee.displayName} will be able to log in again.',
         ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(disabled ? 'Suspend' : 'Reactivate')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text('Cancel')),
+          TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text(disabled ? 'Suspend' : 'Reactivate')),
         ],
       ),
     );
@@ -185,17 +221,25 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
 
     setState(() => _busyUids.add(employee.uid));
     try {
-      debugPrint('ManageEmployeesScreen._setStatus: calling setStatus uid=${employee.uid} disabled=$disabled');
-      await ref.read(employeeControllerProvider.notifier).setStatus(employee.uid, disabled: disabled);
-      debugPrint('ManageEmployeesScreen._setStatus: setStatus succeeded uid=${employee.uid} disabled=$disabled');
+      debugPrint(
+          'ManageEmployeesScreen._setStatus: calling setStatus uid=${employee.uid} disabled=$disabled');
+      await ref
+          .read(employeeControllerProvider.notifier)
+          .setStatus(employee.uid, disabled: disabled);
+      debugPrint(
+          'ManageEmployeesScreen._setStatus: setStatus succeeded uid=${employee.uid} disabled=$disabled');
     } catch (error, stackTrace) {
-      debugPrint('ManageEmployeesScreen._setStatus: setStatus failed error=$error');
-      AppLogger.error('ManageEmployees', 'setStatus failed', error: error, stackTrace: stackTrace);
+      debugPrint(
+          'ManageEmployeesScreen._setStatus: setStatus failed error=$error');
+      AppLogger.error('ManageEmployees', 'setStatus failed',
+          error: error, stackTrace: stackTrace);
       if (!context.mounted) return;
       QuickAlert.show(
         context: context,
         type: QuickAlertType.error,
-        title: disabled ? 'Failed to suspend employee' : 'Failed to reactivate employee',
+        title: disabled
+            ? 'Failed to suspend employee'
+            : 'Failed to reactivate employee',
         text: UserFacingError.describe(error),
       );
     } finally {
@@ -230,11 +274,16 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
                 const SizedBox(width: 8),
                 DropdownButton<_StatusFilter>(
                   value: _statusFilter,
-                  onChanged: (value) => setState(() => _statusFilter = value ?? _StatusFilter.all),
+                  onChanged: (value) => setState(
+                      () => _statusFilter = value ?? _StatusFilter.all),
                   items: const [
-                    DropdownMenuItem(value: _StatusFilter.all, child: Text('All')),
-                    DropdownMenuItem(value: _StatusFilter.active, child: Text('Active')),
-                    DropdownMenuItem(value: _StatusFilter.suspended, child: Text('Suspended')),
+                    DropdownMenuItem(
+                        value: _StatusFilter.all, child: Text('All')),
+                    DropdownMenuItem(
+                        value: _StatusFilter.active, child: Text('Active')),
+                    DropdownMenuItem(
+                        value: _StatusFilter.suspended,
+                        child: Text('Suspended')),
                   ],
                 ),
               ],
@@ -243,99 +292,132 @@ class _ManageEmployeesScreenState extends ConsumerState<ManageEmployeesScreen> {
           Expanded(
             child: employees.when(
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (error, _) =>
-                  Center(child: Text('Failed to load employees: ${UserFacingError.describe(error)}')),
+              error: (error, _) => Center(
+                  child: Text(
+                      'Failed to load employees: ${UserFacingError.describe(error)}')),
               data: (items) {
                 if (items.isEmpty) {
                   return const Center(
-                    child: Text('No employees yet.\nTap "Add Employee" to create one.', textAlign: TextAlign.center),
+                    child: Text(
+                        'No employees yet.\nTap "Add Employee" to create one.',
+                        textAlign: TextAlign.center),
                   );
                 }
                 final filtered = _applyFilters(items);
                 if (filtered.isEmpty) {
-                  return const Center(child: Text('No employees match this search/filter.'));
+                  return const Center(
+                      child: Text('No employees match this search/filter.'));
                 }
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final employee = filtered[index];
-                    final isBusy = _busyUids.contains(employee.uid);
-                    return ListTile(
-                      onTap: () => context.push('/admin/employees/edit', extra: employee),
-                      leading: CircleAvatar(
-                        backgroundColor: (employee.photoUrl != null && employee.photoUrl!.isNotEmpty)
-                            ? null
-                            : AccentPalette.forLabel(employee.displayName).withValues(alpha: 0.15),
-                        foregroundColor: AccentPalette.forLabel(employee.displayName),
-                        backgroundImage: (employee.photoUrl != null && employee.photoUrl!.isNotEmpty)
-                            ? NetworkImage(employee.photoUrl!)
-                            : null,
-                        child: (employee.photoUrl == null || employee.photoUrl!.isEmpty)
-                            ? Text(
-                                employee.displayName.isNotEmpty ? employee.displayName[0].toUpperCase() : '?',
-                              )
-                            : null,
-                      ),
-                      title: Row(
-                        children: [
-                          Flexible(child: Text(employee.displayName)),
-                          if (employee.disabled) ...[
-                            const SizedBox(width: 8),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: Theme.of(context).colorScheme.error.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                'Suspended',
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
+                return RefreshIndicator(
+                  onRefresh: () =>
+                      ref.refresh(employeeControllerProvider.future),
+                  child: ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final employee = filtered[index];
+                      final isBusy = _busyUids.contains(employee.uid);
+                      return ListTile(
+                        onTap: () => context.push('/admin/employees/edit',
+                            extra: employee),
+                        leading: CircleAvatar(
+                          backgroundColor: (employee.photoUrl != null &&
+                                  employee.photoUrl!.isNotEmpty)
+                              ? null
+                              : AccentPalette.forLabel(employee.displayName)
+                                  .withValues(alpha: 0.15),
+                          foregroundColor:
+                              AccentPalette.forLabel(employee.displayName),
+                          backgroundImage: (employee.photoUrl != null &&
+                                  employee.photoUrl!.isNotEmpty)
+                              ? NetworkImage(employee.photoUrl!)
+                              : null,
+                          child: (employee.photoUrl == null ||
+                                  employee.photoUrl!.isEmpty)
+                              ? Text(
+                                  employee.displayName.isNotEmpty
+                                      ? employee.displayName[0].toUpperCase()
+                                      : '?',
+                                )
+                              : null,
+                        ),
+                        title: Row(
+                          children: [
+                            Flexible(child: Text(employee.displayName)),
+                            if (employee.disabled) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 6, vertical: 2),
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .error
+                                      .withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(
+                                  'Suspended',
+                                  style: TextStyle(
+                                    color: Theme.of(context).colorScheme.error,
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
                           ],
-                        ],
-                      ),
-                      subtitle: Text('${employee.designation} • ${employee.areaName} • ${employee.loginIdentifier}'),
-                      trailing: isBusy
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: Padding(
-                                padding: EdgeInsets.all(2.0),
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        subtitle: Text(
+                            '${employee.designation} • ${employee.areaName} • ${employee.loginIdentifier}'),
+                        trailing: isBusy
+                            ? const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: Padding(
+                                  padding: EdgeInsets.all(2.0),
+                                  child:
+                                      CircularProgressIndicator(strokeWidth: 2),
+                                ),
+                              )
+                            : Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  IconButton(
+                                    icon: Icon(employee.disabled
+                                        ? Icons.play_circle_outline
+                                        : Icons.pause_circle_outline),
+                                    tooltip: employee.disabled
+                                        ? 'Reactivate'
+                                        : 'Suspend',
+                                    onPressed: () => _setStatus(context, ref,
+                                        employee, !employee.disabled),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.lock_reset),
+                                    tooltip: 'Reset password',
+                                    onPressed: () =>
+                                        _resetPassword(context, ref, employee),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.send_outlined),
+                                    tooltip: 'Send credentials',
+                                    onPressed: () =>
+                                        _sendCredentials(context, employee),
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .error),
+                                    tooltip: 'Remove',
+                                    onPressed: () =>
+                                        _delete(context, ref, employee),
+                                  ),
+                                ],
                               ),
-                            )
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                IconButton(
-                                  icon: Icon(employee.disabled ? Icons.play_circle_outline : Icons.pause_circle_outline),
-                                  tooltip: employee.disabled ? 'Reactivate' : 'Suspend',
-                                  onPressed: () => _setStatus(context, ref, employee, !employee.disabled),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.lock_reset),
-                                  tooltip: 'Reset password',
-                                  onPressed: () => _resetPassword(context, ref, employee),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.send_outlined),
-                                  tooltip: 'Send credentials',
-                                  onPressed: () => _sendCredentials(context, employee),
-                                ),
-                                IconButton(
-                                  icon: Icon(Icons.delete, color: Theme.of(context).colorScheme.error),
-                                  tooltip: 'Remove',
-                                  onPressed: () => _delete(context, ref, employee),
-                                ),
-                              ],
-                            ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 );
               },
             ),

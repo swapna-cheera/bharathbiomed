@@ -49,14 +49,14 @@ final List<_WebSection> _fullAdminSections = [
     _WebDestination('Departments', Icons.apartment, (_) => const ManageDepartmentsScreen()),
     _WebDestination('Designations', Icons.badge_outlined, (_) => const ManageDesignationsScreen()),
     _WebDestination('Doctors', Icons.local_hospital_outlined, (_) => const AdminDoctorsScreen()),
-    _WebDestination('Doctor Requests', Icons.fact_check_outlined, (_) => const DoctorRequestsScreen()),
+    _WebDestination('Doctor Requests', Icons.how_to_reg_outlined, (_) => const DoctorRequestsScreen()),
     _WebDestination('Agencies', Icons.add_business_outlined, (_) => const AgenciesScreen()),
     _WebDestination('Pharmacies', Icons.local_pharmacy_outlined, (_) => const PharmaciesScreen()),
-    _WebDestination('Agency/Pharmacy Requests', Icons.fact_check_outlined, (_) => const EntityRequestsScreen()),
+    _WebDestination('Agency/Pharmacy Requests', Icons.pending_actions_outlined, (_) => const EntityRequestsScreen()),
   ]),
   _WebSection('Field Operations', [
     _WebDestination('Visit Plan Approvals', Icons.map_outlined, (_) => const VisitPlanApprovalScreen()),
-    _WebDestination('RCPA Entries', Icons.fact_check_outlined, (_) => const RcpaDashboardScreen()),
+    _WebDestination('RCPA Entries', Icons.checklist_outlined, (_) => const RcpaDashboardScreen()),
     _WebDestination('Compliance', Icons.gavel_outlined, (_) => const ComplianceDashboardScreen()),
     _WebDestination('Usage Dashboard', Icons.bar_chart, (_) => const UsageDashboardScreen()),
   ]),
@@ -87,7 +87,7 @@ final List<_WebSection> _officeAdminSections = [
   _WebSection('Agencies & Pharmacies', [
     _WebDestination('Agencies', Icons.add_business_outlined, (_) => const AgenciesScreen()),
     _WebDestination('Pharmacies', Icons.local_pharmacy_outlined, (_) => const PharmaciesScreen()),
-    _WebDestination('Agency/Pharmacy Requests', Icons.fact_check_outlined, (_) => const EntityRequestsScreen()),
+    _WebDestination('Agency/Pharmacy Requests', Icons.pending_actions_outlined, (_) => const EntityRequestsScreen()),
   ]),
   _WebSection('Inventory', [
     _WebDestination('Inventory', Icons.inventory_2_outlined, (_) => const ManageInventoryScreen()),

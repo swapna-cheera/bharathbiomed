@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
@@ -71,6 +72,11 @@ class _VisitPlanScreenState extends ConsumerState<VisitPlanScreen> {
         appBar: AppBar(
           title: const Text('Weekly Visit Plan'),
           actions: [
+            IconButton(
+              icon: const Icon(Icons.storefront_outlined),
+              tooltip: 'Product Catalog',
+              onPressed: () => context.push('/catalog'),
+            ),
             if (plan != null)
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),

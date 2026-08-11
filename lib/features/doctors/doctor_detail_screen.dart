@@ -36,6 +36,11 @@ class DoctorDetailScreen extends ConsumerWidget {
         title: Text(doctor.name),
         actions: [
           IconButton(
+            icon: const Icon(Icons.storefront_outlined),
+            tooltip: 'Product Catalog',
+            onPressed: () => context.push('/catalog'),
+          ),
+          IconButton(
             icon: const Icon(Icons.edit_outlined),
             tooltip: 'Edit',
             onPressed: () => context.push('/doctors/edit', extra: doctor),

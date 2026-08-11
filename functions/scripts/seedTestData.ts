@@ -153,7 +153,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  initializeApp();
+  initializeApp({projectId: process.env.GOOGLE_CLOUD_PROJECT || process.env.GCLOUD_PROJECT});
   const firestore = getFirestore();
   const auth = getAuth();
 

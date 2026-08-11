@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import '../../core/error/app_logger.dart';
 import '../../core/error/user_facing_error.dart';
 import '../../core/theme/accent_palette.dart';
+import '../../core/widgets/app_list_card.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../data/providers.dart';
 import '../../domain/models/doctor.dart';
 import 'doctor_controller.dart';
@@ -70,6 +72,11 @@ class _MrDoctorsScreenState extends ConsumerState<MrDoctorsScreen> {
         title: const Text('My Doctors'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.storefront_outlined),
+            tooltip: 'Product Catalog',
+            onPressed: () => context.push('/catalog'),
+          ),
+          IconButton(
             icon: _syncing
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
                 : const Icon(Icons.sync),
@@ -99,33 +106,50 @@ class _MrDoctorsScreenState extends ConsumerState<MrDoctorsScreen> {
               error: (error, _) => Center(child: Text('Failed to load doctors: ${UserFacingError.describe(error)}')),
               data: (doctors) {
                 if (doctors.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No doctors assigned yet.\nAsk your admin to assign some, or add one you\'re visiting for the first time.',
-                      textAlign: TextAlign.center,
+                  return RefreshIndicator(
+                    onRefresh: _sync,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        EmptyState(
+                          icon: Icons.local_hospital_outlined,
+                          message: 'No doctors assigned yet.\nAsk your admin to assign some, or add one you\'re visiting for the first time.',
+                        ),
+                      ],
                     ),
                   );
                 }
                 final filtered = _applyFilter(doctors);
                 if (filtered.isEmpty) {
-                  return const Center(child: Text('No doctors match this search.'));
+                  return RefreshIndicator(
+                    onRefresh: _sync,
+                    child: ListView(
+                      children: const [
+                        SizedBox(height: 80),
+                        EmptyState(icon: Icons.search_off, message: 'No doctors match this search.'),
+                      ],
+                    ),
+                  );
                 }
-                return ListView.builder(
-                  itemCount: filtered.length,
-                  itemBuilder: (context, index) {
-                    final doctor = filtered[index];
-                    return ListTile(
-                      onTap: () => context.push('/doctors/detail', extra: doctor),
-                      leading: CircleAvatar(
-                        backgroundColor: AccentPalette.forLabel(doctor.name).withValues(alpha: 0.15),
-                        foregroundColor: AccentPalette.forLabel(doctor.name),
-                        child: Text(doctor.name.isNotEmpty ? doctor.name[0].toUpperCase() : '?'),
-                      ),
-                      title: Text(doctor.name),
-                      subtitle: Text('${doctor.hospitalName}${doctor.specialisation.isEmpty ? '' : ' • ${doctor.specialisation}'}'),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                    );
-                  },
+                return RefreshIndicator(
+                  onRefresh: _sync,
+                  child: ListView.builder(
+                    itemCount: filtered.length,
+                    itemBuilder: (context, index) {
+                      final doctor = filtered[index];
+                      return AppListCard(
+                        onTap: () => context.push('/doctors/detail', extra: doctor),
+                        leading: CircleAvatar(
+                          backgroundColor: AccentPalette.forLabel(doctor.name).withValues(alpha: 0.15),
+                          foregroundColor: AccentPalette.forLabel(doctor.name),
+                          child: Text(doctor.name.isNotEmpty ? doctor.name[0].toUpperCase() : '?'),
+                        ),
+                        title: Text(doctor.name),
+                        subtitle: Text('${doctor.hospitalName}${doctor.specialisation.isEmpty ? '' : ' • ${doctor.specialisation}'}'),
+                        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      );
+                    },
+                  ),
                 );
               },
             ),

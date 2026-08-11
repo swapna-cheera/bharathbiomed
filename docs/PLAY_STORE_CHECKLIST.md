@@ -66,21 +66,53 @@ This app collects, via Firebase:
 
 ## 4. Store listing content (draft — edit freely)
 
+This app has grown well past a catalog viewer — see
+[docs/BUSINESS_OVERVIEW.md](BUSINESS_OVERVIEW.md) for the full feature set.
+The listing below reflects that.
+
 - **Category suggestion:** Business, or Medical (pick whichever your Play
   Console developer account is verified for — Medical apps sometimes need
   extra verification).
 - **Short description** (max 80 chars):
-  `Browse and present Bharath Biomed's pharma product catalog, online or off.`
+  `Bharath Biomed field app: catalog, doctor visits, orders, RCPA, compliance`
 - **Full description** (draft, expand as you like):
-  > The Bharath Biomed Pharma app is your convenient gateway to explore and
-  > present a wide range of high-quality pharmaceutical products. Browse
-  > products organized by department, select the ones you want to showcase,
-  > and present them full-screen in a swipeable, zoomable slideshow — built
-  > for field sales conversations with or without an internet connection.
-  > Sign in once to sync the latest catalog, then use the app fully offline.
+  > BharathBiomed Connect is the all-in-one field app for Bharath Biomed
+  > Pharma's sales team and office staff — covering a Medical
+  > Representative's full day-to-day workflow, not just the product catalog.
+  >
+  > Medical Representatives can:
+  > - Sign in to sync the latest product catalog, doctor list, and
+  >   distributor/pharmacy data, then work fully offline
+  > - Browse products by department and present a swipeable, pinch-to-zoom
+  >   slideshow during doctor visits
+  > - Maintain their doctor list and weekly visit plan, and log each visit
+  > - Place orders against distributors and track them through to delivery
+  > - Record Retail Chemist Prescription Audit (RCPA) entries and UCPMP
+  >   compliance logs (gifts/samples/sponsorships)
+  > - File expense (TA/DA) claims and track their monthly sales targets
+  >
+  > Managers get a "My Team" view to review and approve their downline's
+  > visit plans, orders, expense claims, and RCPA/compliance entries, plus
+  > rollup dashboards for usage, targets, and visit activity.
+  >
+  > Office Admins and Admins manage the product catalog, departments,
+  > employees, designations, inventory/expiry alerts, and distributor/
+  > pharmacy records — from the tablet app or a desktop web console.
+  >
+  > Built offline-first: an MR's catalog, doctor data, and daily work all
+  > continue to function without a network connection, syncing
+  > automatically the next time they're online.
+  >
+  > This app is intended for product information, field-sales workflow, and
+  > presentation support only. It does not provide medical advice,
+  > diagnosis, or treatment. Always consult a qualified healthcare
+  > professional for medical decisions.
 - **Content rating questionnaire:** no user-generated content, no ads, no
   violence/mature content — should land on "Everyone".
-- **Screenshots / feature graphic:** automated — see the next section.
+- **Screenshots / feature graphic:** automated screenshot test only covers
+  login → catalog → slideshow (see §4a) — it predates the doctor/orders/RCPA/
+  etc. features, so screenshots for those screens still need to be captured
+  manually if you want them in the listing.
 
 ## 4a. Automated screenshots
 

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/error/user_facing_error.dart';
+import '../../core/widgets/app_list_card.dart';
+import '../../core/widgets/empty_state.dart';
 import '../../domain/models/employee.dart';
 import '../admin/usage_format.dart';
 import 'visit_log_dashboard_controller.dart';
@@ -25,14 +27,14 @@ class EmployeeVisitLogsScreen extends ConsumerWidget {
         data: (dashboard) {
           final logs = dashboard.logsByEmployee[employee.uid] ?? const [];
           if (logs.isEmpty) {
-            return const Center(child: Text('No visits logged yet.'));
+            return const EmptyState(icon: Icons.assignment_outlined, message: 'No visits logged yet.');
           }
           return ListView.builder(
             padding: const EdgeInsets.symmetric(vertical: 16.0),
             itemCount: logs.length,
             itemBuilder: (context, index) {
               final log = logs[index];
-              return ListTile(
+              return AppListCard(
                 leading: CircleAvatar(
                   backgroundColor: log.visited ? const Color(0x1A2E7D32) : const Color(0x1AEF6C00),
                   foregroundColor: log.visited ? const Color(0xFF2E7D32) : const Color(0xFFEF6C00),
