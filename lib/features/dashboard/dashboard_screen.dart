@@ -24,7 +24,9 @@ class DashboardScreen extends ConsumerWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Log out?'),
-        content: const Text('You can keep browsing the catalog offline after logging out — sync just needs signing in again.'),
+        content: const Text(
+          'This clears all local data on this device, including anything not yet synced. Make sure everything is synced first.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
@@ -132,12 +134,12 @@ class DashboardScreen extends ConsumerWidget {
                   label: 'My Orders',
                   onTap: () => context.push('/orders'),
                 ),
-                if (isOfficeAdmin)
-                  DashboardTile(
-                    icon: Icons.inventory_2_outlined,
-                    label: 'Manage Inventory',
-                    onTap: () => context.push('/admin/inventory'),
-                  ),
+                // if (isOfficeAdmin)
+                //   DashboardTile(
+                //     icon: Icons.inventory_2_outlined,
+                //     label: 'Manage Inventory',
+                //     onTap: () => context.push('/admin/inventory'),
+                //   ),
               ],
             ),
           ),
@@ -151,11 +153,11 @@ class DashboardScreen extends ConsumerWidget {
                   label: 'My Target',
                   onTap: () => context.push('/targets'),
                 ),
-                DashboardTile(
-                  icon: Icons.checklist_outlined,
-                  label: 'RCPA Entries',
-                  onTap: () => context.push('/rcpa'),
-                ),
+                // DashboardTile(
+                //   icon: Icons.checklist_outlined,
+                //   label: 'RCPA Entries',
+                //   onTap: () => context.push('/rcpa'),
+                // ),
                 DashboardTile(
                   icon: Icons.request_page_outlined,
                   label: 'My Expense Claims',

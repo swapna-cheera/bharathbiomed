@@ -44,7 +44,9 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Log out?'),
-        content: const Text('You\'ll need to sign in again to reach the admin panel.'),
+        content: const Text(
+          'You\'ll need to sign in again to reach the admin panel. This also clears all local data on this device, including anything not yet synced.',
+        ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
           TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
@@ -87,18 +89,18 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
       MapEntry('Field Operations', [
         DashboardTile(
             icon: Icons.assignment_outlined, label: 'Visit Logs', onTap: () => context.push('/team/visit-logs')),
-        DashboardTile(
-            icon: Icons.checklist_outlined, label: 'RCPA Entries', onTap: () => context.push('/team/rcpa')),
+        // DashboardTile(
+        //     icon: Icons.checklist_outlined, label: 'RCPA Entries', onTap: () => context.push('/team/rcpa')),
         DashboardTile(
             icon: Icons.bar_chart, label: 'Usage Dashboard', onTap: () => context.push('/admin/dashboard')),
       ]),
       MapEntry('Financial', [
-        DashboardTile(
-            icon: Icons.inventory_2_outlined, label: 'Inventory', onTap: () => context.push('/admin/inventory')),
-        DashboardTile(
-            icon: Icons.warning_amber_outlined,
-            label: 'Expiry Alerts',
-            onTap: () => context.push('/admin/inventory/expiry-alerts')),
+        // DashboardTile(
+        //     icon: Icons.inventory_2_outlined, label: 'Inventory', onTap: () => context.push('/admin/inventory')),
+        // DashboardTile(
+        //     icon: Icons.warning_amber_outlined,
+        //     label: 'Expiry Alerts',
+        //     onTap: () => context.push('/admin/inventory/expiry-alerts')),
         DashboardTile(
             icon: Icons.receipt_long_outlined, label: 'Order Workflow', onTap: () => context.push('/team/orders')),
         DashboardTile(

@@ -251,4 +251,36 @@ class AppDatabase {
       )
     ''');
   }
+
+  static const _allTableNames = [
+    'products',
+    'departments',
+    'usage_sessions',
+    'doctors',
+    'doctor_visit_plan',
+    'doctor_change_requests',
+    'doctor_visit_logs',
+    'agencies',
+    'pharmacies',
+    'entity_change_requests',
+    'orders',
+    'rcpa_entries',
+    'expense_claims',
+    'compliance_logs',
+  ];
+
+  /// Wipes every row from every local table, including any not-yet-synced
+  /// queue entries (offline RCPA/orders/expense claims/visit logs/etc).
+  /// Called on logout so a different user signing in on the same device
+  /// never sees a previous user's cached or pending data.
+  Future<void> clearAll() async {
+    debugPrint('AppDatabase.clearAll: wiping all local tables');
+    final db = await database;
+    final batch = db.batch();
+    for (final table in _allTableNames) {
+      batch.delete(table);
+    }
+    await batch.commit(noResult: true);
+    debugPrint('AppDatabase.clearAll: done');
+  }
 }

@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/local/app_database.dart';
 import '../../data/providers.dart';
 
 /// Raw Firebase auth-state stream. Used by the router to redirect a user
@@ -38,6 +39,11 @@ class AuthController extends AsyncNotifier<User?> {
     debugPrint('AuthController.signOut: signing out current user');
     await ref.read(authRepositoryProvider).signOut();
     debugPrint('AuthController.signOut: signed out successfully');
+    try {
+      await AppDatabase.instance.clearAll();
+    } catch (error, stackTrace) {
+      debugPrint('AuthController.signOut: failed to clear local database error=$error\n$stackTrace');
+    }
     state = const AsyncData(null);
   }
 

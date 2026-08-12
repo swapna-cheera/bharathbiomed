@@ -98,6 +98,20 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
 
   Future<void> _logout() async {
     debugPrint('CompleteProfileScreen._logout: logout requested');
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text(
+          'This clears all local data on this device, including anything not yet synced. Make sure everything is synced first.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
     await ref.read(authControllerProvider.notifier).signOut();
     if (!mounted) return;
     context.go('/login');

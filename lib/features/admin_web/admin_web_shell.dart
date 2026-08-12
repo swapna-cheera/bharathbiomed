@@ -7,11 +7,11 @@ import '../admin/admin_access.dart';
 import '../admin/admin_notifications_screen.dart';
 import '../admin/doctors/admin_doctors_screen.dart';
 import '../admin/doctors/doctor_requests_screen.dart';
-import '../admin/expiry_alerts_screen.dart';
+// import '../admin/expiry_alerts_screen.dart';
 import '../admin/manage_departments_screen.dart';
 import '../admin/manage_designations_screen.dart';
 import '../admin/manage_employees_screen.dart';
-import '../admin/manage_inventory_screen.dart';
+// import '../admin/manage_inventory_screen.dart';
 import '../admin/usage_dashboard_screen.dart';
 import '../agencies/agencies_screen.dart';
 import '../compliance/compliance_dashboard_screen.dart';
@@ -21,7 +21,7 @@ import '../doctors/visit_plan_approval_screen.dart';
 import '../orders/order_approval_screen.dart';
 import '../pharmacies/pharmacies_screen.dart';
 import '../targets/team_targets_screen.dart';
-import '../team/rcpa_dashboard_screen.dart';
+// import '../team/rcpa_dashboard_screen.dart';
 
 /// One entry in [AdminWebShell]'s sidebar: an icon/label, and the existing
 /// screen widget to show for it. Every screen here is reused exactly as it
@@ -56,13 +56,13 @@ final List<_WebSection> _fullAdminSections = [
   ]),
   _WebSection('Field Operations', [
     _WebDestination('Visit Plan Approvals', Icons.map_outlined, (_) => const VisitPlanApprovalScreen()),
-    _WebDestination('RCPA Entries', Icons.checklist_outlined, (_) => const RcpaDashboardScreen()),
+    // _WebDestination('RCPA Entries', Icons.checklist_outlined, (_) => const RcpaDashboardScreen()),
     _WebDestination('Compliance', Icons.gavel_outlined, (_) => const ComplianceDashboardScreen()),
     _WebDestination('Usage Dashboard', Icons.bar_chart, (_) => const UsageDashboardScreen()),
   ]),
   _WebSection('Financial', [
-    _WebDestination('Inventory', Icons.inventory_2_outlined, (_) => const ManageInventoryScreen()),
-    _WebDestination('Expiry Alerts', Icons.warning_amber_outlined, (_) => const ExpiryAlertsScreen()),
+    // _WebDestination('Inventory', Icons.inventory_2_outlined, (_) => const ManageInventoryScreen()),
+    // _WebDestination('Expiry Alerts', Icons.warning_amber_outlined, (_) => const ExpiryAlertsScreen()),
     _WebDestination('Orders', Icons.receipt_long_outlined, (_) => const OrderApprovalScreen()),
     _WebDestination('Targets', Icons.track_changes_outlined, (_) => const TeamTargetsScreen()),
   ]),
@@ -90,8 +90,8 @@ final List<_WebSection> _officeAdminSections = [
     _WebDestination('Agency/Pharmacy Requests', Icons.pending_actions_outlined, (_) => const EntityRequestsScreen()),
   ]),
   _WebSection('Inventory', [
-    _WebDestination('Inventory', Icons.inventory_2_outlined, (_) => const ManageInventoryScreen()),
-    _WebDestination('Expiry Alerts', Icons.warning_amber_outlined, (_) => const ExpiryAlertsScreen()),
+    // _WebDestination('Inventory', Icons.inventory_2_outlined, (_) => const ManageInventoryScreen()),
+    // _WebDestination('Expiry Alerts', Icons.warning_amber_outlined, (_) => const ExpiryAlertsScreen()),
   ]),
 ];
 

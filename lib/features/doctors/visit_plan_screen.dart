@@ -27,6 +27,21 @@ class VisitPlanScreen extends ConsumerStatefulWidget {
 
 class _VisitPlanScreenState extends ConsumerState<VisitPlanScreen> {
   bool _submitting = false;
+  bool _syncing = false;
+
+  Future<void> _sync() async {
+    setState(() => _syncing = true);
+    try {
+      await ref.read(doctorVisitPlanControllerProvider.notifier).sync();
+    } catch (error, stackTrace) {
+      AppLogger.error('VisitPlanScreen', 'sync failed', error: error, stackTrace: stackTrace);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Sync failed: ${UserFacingError.describe(error)}')));
+    } finally {
+      if (mounted) setState(() => _syncing = false);
+    }
+  }
 
   Color _statusColor(VisitPlanStatus status) => switch (status) {
         VisitPlanStatus.draft => Colors.grey,
@@ -76,6 +91,13 @@ class _VisitPlanScreenState extends ConsumerState<VisitPlanScreen> {
               icon: const Icon(Icons.storefront_outlined),
               tooltip: 'Product Catalog',
               onPressed: () => context.push('/catalog'),
+            ),
+            IconButton(
+              icon: _syncing
+                  ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                  : const Icon(Icons.sync),
+              tooltip: 'Sync',
+              onPressed: _syncing ? null : _sync,
             ),
             if (plan != null)
               Padding(

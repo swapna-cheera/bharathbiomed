@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../core/widgets/dashboard_tile.dart';
 import '../../core/widgets/section_header.dart';
 import '../../domain/models/permission.dart';
+import '../auth/auth_controller.dart';
 import 'team_access.dart';
 
 /// Entry point for a manager's view of their own reporting-chain downline
@@ -22,12 +23,41 @@ import 'team_access.dart';
 class TeamHomeScreen extends ConsumerWidget {
   const TeamHomeScreen({super.key});
 
+  Future<void> _logout(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Log out?'),
+        content: const Text(
+          'This clears all local data on this device, including anything not yet synced. Make sure everything is synced first.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Log out')),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+    await ref.read(authControllerProvider.notifier).signOut();
+    if (!context.mounted) return;
+    context.go('/login');
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final canApproveRequests = ref.watch(hasPermissionProvider(Permission.approveRequests));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Team')),
+      appBar: AppBar(
+        title: const Text('My Team'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: 'Log out',
+            onPressed: () => _logout(context, ref),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
@@ -94,11 +124,11 @@ class TeamHomeScreen extends ConsumerWidget {
                   label: 'Team Targets',
                   onTap: () => context.push('/team/targets'),
                 ),
-                DashboardTile(
-                  icon: Icons.checklist_outlined,
-                  label: 'RCPA Entries',
-                  onTap: () => context.push('/team/rcpa'),
-                ),
+                // DashboardTile(
+                //   icon: Icons.checklist_outlined,
+                //   label: 'RCPA Entries',
+                //   onTap: () => context.push('/team/rcpa'),
+                // ),
                 DashboardTile(
                   icon: Icons.request_page_outlined,
                   label: 'Expense Claims',
