@@ -73,7 +73,10 @@ void main() {
       await binding.takeScreenshot('04_catalog_selected');
 
       await tester.tap(find.byIcon(Icons.play_arrow));
-      await tester.pumpAndSettle(const Duration(seconds: 2));
+      // Slideshow forces a real landscape rotation (see slideshow_screen.dart)
+      // plus a network image fetch; give both time to fully settle before
+      // requesting a screenshot, or the native window can be mid-transition.
+      await tester.pumpAndSettle(const Duration(seconds: 6));
       await binding.takeScreenshot('05_slideshow');
 
       await tester.pageBack();

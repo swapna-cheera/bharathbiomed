@@ -169,7 +169,14 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
                       ))
                   .where((section) => section.value.isNotEmpty)
                   .toList();
-          final departmentCount = query.isEmpty ? snapshot.departments.length : 0;
+          // Departments get their own list (with live product counts) right
+          // under the header, ahead of the quick-action grid — hidden while
+          // searching since the grid's filtered results take that spot.
+          final showDepartments = query.isEmpty;
+          final departmentsEmpty = showDepartments && snapshot.departments.isEmpty;
+          final departmentItemCount = showDepartments ? (departmentsEmpty ? 1 : snapshot.departments.length) : 0;
+          final departmentSectionLength = showDepartments ? 1 + departmentItemCount : 0;
+          final gridIndex = 1 + departmentSectionLength;
 
           return RefreshIndicator(
             onRefresh: () {
@@ -177,7 +184,7 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
               return ref.read(adminCatalogControllerProvider.notifier).refresh();
             },
             child: ListView.builder(
-              itemCount: departmentCount == 0 ? 3 : departmentCount + 3,
+              itemCount: gridIndex + 1,
               itemBuilder: (context, index) {
                 if (index == 0) {
                   return Padding(
@@ -240,55 +247,57 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen> {
                     ),
                   );
                 }
-                if (index == 1) {
-                  if (filteredSections.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                      child: Text('No admin actions match your search.', textAlign: TextAlign.center),
+                if (showDepartments) {
+                  if (index == 1) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                      child: Text('Departments', style: Theme.of(context).textTheme.titleSmall),
                     );
                   }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      for (final section in filteredSections) ...[
-                        SectionHeader(title: section.key),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                          child: DashboardGrid(children: section.value),
-                        ),
-                      ],
-                    ],
-                  );
+                  if (departmentsEmpty && index == 2) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+                      child: Text(
+                        'No departments yet.\nUse Departments in the grid below to add one.',
+                        textAlign: TextAlign.center,
+                      ),
+                    );
+                  }
+                  if (!departmentsEmpty && index >= 2 && index < 2 + departmentItemCount) {
+                    final department = snapshot.departments[index - 2];
+                    final count = snapshot.products.where((p) => p.departments.containsKey(department)).length;
+                    final color = AccentPalette.forLabel(department);
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: color.withValues(alpha: 0.15),
+                        foregroundColor: color,
+                        child: Text(department.isNotEmpty ? department[0].toUpperCase() : '?'),
+                      ),
+                      title: Text(department),
+                      subtitle: Text('$count product${count == 1 ? '' : 's'}'),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () => context.push('/admin/departments/products', extra: department),
+                    );
+                  }
                 }
-                if (index == 2) {
-                  if (departmentCount == 0) return const SizedBox.shrink();
-                  return Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-                    child: Text('Departments', style: Theme.of(context).textTheme.titleSmall),
-                  );
-                }
-                if (snapshot.departments.isEmpty) {
+                // index == gridIndex
+                if (filteredSections.isEmpty) {
                   return const Padding(
                     padding: EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-                    child: Text(
-                      'No departments yet.\nUse Departments in the grid above to add one.',
-                      textAlign: TextAlign.center,
-                    ),
+                    child: Text('No admin actions match your search.', textAlign: TextAlign.center),
                   );
                 }
-                final department = snapshot.departments[index - 3];
-                final count = snapshot.products.where((p) => p.departments.containsKey(department)).length;
-                final color = AccentPalette.forLabel(department);
-                return ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: color.withValues(alpha: 0.15),
-                    foregroundColor: color,
-                    child: Text(department.isNotEmpty ? department[0].toUpperCase() : '?'),
-                  ),
-                  title: Text(department),
-                  subtitle: Text('$count product${count == 1 ? '' : 's'}'),
-                  trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                  onTap: () => context.push('/admin/departments/products', extra: department),
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final section in filteredSections) ...[
+                      SectionHeader(title: section.key),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                        child: DashboardGrid(children: section.value),
+                      ),
+                    ],
+                  ],
                 );
               },
             ),

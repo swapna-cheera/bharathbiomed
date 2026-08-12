@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:widget_zoom/widget_zoom.dart';
 
+import '../../core/error/app_logger.dart';
 import '../../core/utils/app_orientation.dart';
 import '../../domain/models/product.dart';
 
@@ -27,15 +30,22 @@ class _SlideshowScreenState extends State<SlideshowScreen> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setPreferredOrientations([
+    // Best-effort: an unhandled failure here (observed on some emulators)
+    // would otherwise become an uncaught async error with nothing awaiting
+    // this future.
+    unawaited(SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
-    ]);
+    ]).catchError((Object error, StackTrace stackTrace) {
+      AppLogger.error('SlideshowScreen', 'setPreferredOrientations (landscape) failed', error: error, stackTrace: stackTrace);
+    }));
   }
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations(defaultOrientations);
+    unawaited(SystemChrome.setPreferredOrientations(defaultOrientations).catchError((Object error, StackTrace stackTrace) {
+      AppLogger.error('SlideshowScreen', 'setPreferredOrientations (restore default) failed', error: error, stackTrace: stackTrace);
+    }));
     super.dispose();
   }
 
